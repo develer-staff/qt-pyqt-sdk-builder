@@ -1,0 +1,32 @@
+{
+    "qt": {
+        "common": [
+            "-accessibility",
+            "-cups",
+            "-no-dbus",
+            "-no-declarative",
+            "-no-exceptions",
+            "-no-multimedia",
+            "-no-native-gestures",
+            "-no-nis",
+            "-no-opengl",
+            "-no-openssl",
+            "-no-phonon",
+            "-no-qt3support",
+            "-no-script",
+            "-no-sql-sqlite",
+            "-no-webkit",
+            "-no-xmlpatterns",
+            "-nomake", "demos",
+            "-nomake", "docs",
+            "-nomake", "examples",
+            "-qt-libjpeg",
+            "-qt-libpng",
+            "-qt-zlib"
+        ],
+        "darwin": [
+            "-no-framework",
+            "-no-glib"
+        ]
+    }
+}

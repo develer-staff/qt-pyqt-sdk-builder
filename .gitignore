@@ -1,0 +1,29 @@
+#
+# Source Directories
+#
+
+PyQt-*/
+icu*/
+qt-everywhere-*/
+sip-*/
+
+#
+# Output Directory
+#
+
+_out/
+
+#
+# License Files
+#
+
+pyqt-commercial.sip
+qt-license
+
+#
+# Misc
+#
+
+.vagrant/
+*.pyc
+*.pyo
