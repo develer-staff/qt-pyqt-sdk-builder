@@ -167,8 +167,8 @@ def build_qt(layout, debug, profile):
 
     # Configure: have the compiler find our local copy of ICU
     if sys.platform == 'darwin' or sys.platform == 'win32':
-        qt_configure_args.extend(['-I', os.path.join(install_root, 'include')])
-        qt_configure_args.extend(['-L', os.path.join(install_root, 'lib')])
+        qt_configure_args.extend(['-I', os.path.join(layout['root'], 'include')])
+        qt_configure_args.extend(['-L', os.path.join(layout['root'], 'lib')])
 
     # Configure: enable parallel build on Windows
     if sys.platform == 'win32':
