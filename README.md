@@ -34,7 +34,7 @@ Python:
 
 SIP/PyQt:
 
-* PyQt 4.11.1 adn 5.3.1
+* PyQt 4.11.1 and 5.3.1
 * SIP 4.16.1
 
 Compilers:
