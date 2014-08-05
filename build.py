@@ -37,7 +37,6 @@ import shutil
 import subprocess
 import sys
 
-import configure
 import util
 
 #
@@ -59,25 +58,17 @@ def main():
     with open(args.profile[0], 'r') as f:
         profile = json.load(f)
 
-    sources = collections.OrderedDict([
-        ('icu', args.with_icu_sources),
-        ('qt', args.with_qt_sources),
-        ('sip', args.with_sip_sources),
-        ('pyqt',args.with_pyqt_sources),
-    ])
-
     make_install_root_skel(layout)
+
+    import configure
     configure.setup_environment(layout)
 
-    # Build
-    for pkg, src_dir in sources.iteritems():
-        if src_dir:
-            util.print_box('Building', pkg, '(%s)' % src_dir)
-
-            with util.chdir(src_dir):
-                globals()['build_' + pkg](layout, args.debug, profile)
-        else:
-            print('WARNING: Missing source directory for %s. Skipped.' % pkg)
+    build_all_recipes([
+        ('ICU',  build_icu,  args.with_icu_sources),
+        ('Qt',   build_qt,   args.with_qt_sources),
+        ('SIP',  build_sip,  args.with_sip_sources),
+        ('PyQt', build_pyqt, args.with_pyqt_sources),
+    ], layout, args.debug, profile)
 
 
 def parse_command_line():
@@ -97,6 +88,17 @@ def make_install_root_skel(layout):
     for d in layout.values():
         if not os.path.isdir(d):
             os.makedirs(d)
+
+
+def build_all_recipes(recipes, layout, debug, profile):
+    for pkg, build_f, src_dir in recipes:
+        if src_dir and os.path.isdir(src_dir):
+            util.print_box('Building %s' % pkg, src_dir)
+
+            with util.chdir(src_dir):
+                build_f(layout, debug, profile)
+        else:
+            print('WARNING: Missing source directory for %s. Skipped.' % pkg)
 
 #
 # Build recipes
