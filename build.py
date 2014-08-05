@@ -28,7 +28,6 @@ from __future__ import print_function
 
 import argparse
 import collections
-import glob
 import json
 import multiprocessing
 import os
@@ -59,20 +58,12 @@ def main():
     with open(args.profile[0], 'r') as f:
         profile = json.load(f)
 
-    if args.rebuild:
-        sources = collections.OrderedDict([
-            ('icu', find_source_dir('icu*') if sys.platform != 'linux2' else None),
-            ('qt', find_source_dir('qt-everywhere-*')),
-            ('sip', find_source_dir('sip-*')),
-            ('pyqt', find_source_dir('PyQt-*')),
-        ])
-    else:
-        sources = collections.OrderedDict([
-            ('icu', args.with_icu_sources),
-            ('qt', args.with_qt_sources),
-            ('sip', args.with_sip_sources),
-            ('pyqt',args.with_pyqt_sources),
-        ])
+    sources = collections.OrderedDict([
+        ('icu', args.with_icu_sources),
+        ('qt', args.with_qt_sources),
+        ('sip', args.with_sip_sources),
+        ('pyqt',args.with_pyqt_sources),
+    ])
 
     make_install_root_skel(layout)
 
@@ -97,7 +88,6 @@ def parse_command_line():
     args_parser = argparse.ArgumentParser()
     args_parser.add_argument('--debug', action='store_true')
     args_parser.add_argument('--install-root', type=str, default=INSTALL_ROOT_DEFAULT)
-    args_parser.add_argument('--rebuild', action='store_true')
     args_parser.add_argument('--with-icu-sources', type=str)
     args_parser.add_argument('--with-qt-sources', type=str)
     args_parser.add_argument('--with-sip-sources', type=str)
@@ -241,12 +231,6 @@ def build_pyqt(layout, debug, profile):
 #
 # Utility methods
 #
-
-def find_source_dir(pattern):
-    found = filter(os.path.isdir, glob.glob(pattern))
-
-    return found[0] if found else None
-
 
 def is_qt5():
     return os.path.isdir('qtbase')
