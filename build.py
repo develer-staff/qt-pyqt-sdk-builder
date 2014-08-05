@@ -263,7 +263,6 @@ def set_pyqt_debug_flags(debug, configure_args):
         else:
             configure_args.append('--debug')
 
-
 #
 # Entry point
 #
