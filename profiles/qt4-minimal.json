@@ -7,7 +7,6 @@
             "-no-declarative",
             "-no-exceptions",
             "-no-multimedia",
-            "-no-native-gestures",
             "-no-nis",
             "-no-opengl",
             "-no-openssl",
@@ -27,6 +26,9 @@
         "darwin": [
             "-no-framework",
             "-no-glib"
+        ],
+        "win32": [
+            "-no-native-gestures"
         ]
     }
 }
