@@ -37,6 +37,7 @@ import shutil
 import subprocess
 import sys
 
+import configure
 import util
 
 #
@@ -66,8 +67,6 @@ def main():
     ])
 
     make_install_root_skel(layout)
-
-    import configure
     configure.setup_environment(layout)
 
     # Build
