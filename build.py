@@ -80,9 +80,6 @@ def main():
         else:
             print('WARNING: Missing source directory for %s. Skipped.' % pkg)
 
-#
-# Commands
-#
 
 def parse_command_line():
     args_parser = argparse.ArgumentParser()
