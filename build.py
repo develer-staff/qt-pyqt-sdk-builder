@@ -28,6 +28,7 @@ from __future__ import print_function
 
 import argparse
 import collections
+import fnmatch
 import json
 import multiprocessing
 import os
@@ -184,7 +185,7 @@ def build_qt(layout, debug, profile):
     make('install')
 
     # Delete all libtool's .la files
-    for root, dirnames, filenames in os.walk(install_root):
+    for root, dirnames, filenames in os.walk(layout['root']):
         for filename in fnmatch.filter(filenames, '*.la'):
             os.remove(os.path.join(root, filename))
 
