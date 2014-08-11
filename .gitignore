@@ -6,6 +6,7 @@ PyQt-*/
 icu*/
 qt-everywhere-*/
 sip-*/
+_source/
 
 #
 # Output Directory
