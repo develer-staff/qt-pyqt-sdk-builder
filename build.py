@@ -29,14 +29,17 @@ from __future__ import print_function
 import argparse
 import collections
 import fnmatch
+import glob
 import json
 import multiprocessing
 import os
 import os.path
 import platform
+import re
 import shutil
 import subprocess
 import sys
+import tarfile
 
 import util
 
@@ -46,43 +49,84 @@ import util
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 HOME = os.path.expanduser('~')
-INSTALL_ROOT_DEFAULT = os.path.join(HERE, '_out')
 PYQT_LICENSE_FILE = os.path.join(HERE, 'pyqt-commercial.sip')
 QT_LICENSE_FILE = os.path.join(HERE, 'qt-license')
 
 
 def main():
     args = parse_command_line()
-    layout = util.get_layout(args.install_root)
 
     # Load build profile
-    with open(args.profile[0], 'r') as f:
+    with open(args.profile, 'r') as f:
         profile = json.load(f)
 
-    make_install_root_skel(layout)
+    # Prepare the build plan
+    plan = []
 
-    import configure
-    configure.setup_environment(layout)
+    if sys.platform == 'darwin' or sys.platform == 'win32':
+        add_to_plan(plan, 'icu', build_icu, args.with_icu_sources)
 
-    build_all_recipes([
-        ('ICU',  build_icu,  args.with_icu_sources),
-        ('Qt',   build_qt,   args.with_qt_sources),
-        ('SIP',  build_sip,  args.with_sip_sources),
-        ('PyQt', build_pyqt, args.with_pyqt_sources),
-    ], layout, args.debug, profile)
+    add_to_plan(plan, 'qt', build_qt, args.with_qt_sources)
+    add_to_plan(plan, 'sip', build_sip, args.with_sip_sources)
+    add_to_plan(plan, 'pyqt', build_pyqt, args.with_pyqt_sources)
+
+    # If user specified some packages on the command line, build only those
+    if args.packages:
+        plan = filter(lambda x: x[0] in args.packages, plan)
+
+    # Determine install root
+    if args.install_root:
+        install_root = args.install_root
+    else:
+        qt_version = get_qt_version(args.with_qt_sources)
+        sip_version = get_sip_version(args.with_sip_sources)
+        pyqt_version = get_pyqt_version(args.with_pyqt_sources)
+        plat = sys.platform
+        arch = platform.architecture()[0]
+        build_type = 'debug' if args.debug else 'release'
+        install_root = os.path.join(HERE, '_out', 'qt-%s-sip-%s-pyqt-%s-%s-%s-%s' % (qt_version, sip_version, pyqt_version, plat, arch, build_type))
+
+    # Get this installation's layout
+    layout = util.get_layout(install_root)
+
+    # Build
+    prep(layout)
+    build(plan, layout, args.debug, profile)
+    install_scripts(install_root)
+    package(install_root, '%s.tar.gz' % (os.path.basename(install_root)))
 
 
 def parse_command_line():
     args_parser = argparse.ArgumentParser()
     args_parser.add_argument('--debug', action='store_true')
-    args_parser.add_argument('--install-root', type=str, default=INSTALL_ROOT_DEFAULT)
+    args_parser.add_argument('--install-root', type=str)
+    args_parser.add_argument('--profile', type=str, required=True)
     args_parser.add_argument('--with-icu-sources', type=str)
-    args_parser.add_argument('--with-qt-sources', type=str)
-    args_parser.add_argument('--with-sip-sources', type=str)
-    args_parser.add_argument('--with-pyqt-sources', type=str)
-    args_parser.add_argument('profile', nargs=1, metavar='profile', type=str)
+    args_parser.add_argument('--with-pyqt-sources', type=str, required=True)
+    args_parser.add_argument('--with-qt-sources', type=str, required=True)
+    args_parser.add_argument('--with-sip-sources', type=str, required=True)
+    args_parser.add_argument('packages', metavar='packages', nargs='*')
 
     return args_parser.parse_args()
+
+
+def add_to_plan(plan, component_name, build_f, source_directory):
+    if not source_directory:
+        print('%s: need a source directory.' % component_name)
+        sys.exit(1)
+
+    if not os.path.isdir(source_directory):
+        print('%s: No such directory: %s' % (compenent_name, source_directory))
+        sys.exit(1)
+
+    plan.append((component_name, build_f, source_directory))
+
+
+def prep(layout):
+    make_install_root_skel(layout)
+
+    import configure
+    configure.setup_environment(layout)
 
 
 def make_install_root_skel(layout):
@@ -91,15 +135,56 @@ def make_install_root_skel(layout):
             os.makedirs(d)
 
 
-def build_all_recipes(recipes, layout, debug, profile):
-    for pkg, build_f, src_dir in recipes:
-        if src_dir and os.path.isdir(src_dir):
-            util.print_box('Building %s' % pkg, src_dir)
+def get_qt_version(qt_dir):
+    globbed = glob.glob(os.path.join(qt_dir, 'changes-*'))
 
-            with util.chdir(src_dir):
-                build_f(layout, debug, profile)
-        else:
-            print('WARNING: Missing source directory for %s. Skipped.' % pkg)
+    if not globbed:
+        raise IOError('Unable to find changes file in Qt directory: %s' % qt_dir)
+
+    changes_file = os.path.basename(globbed[0])
+
+    assert len(changes_file) == len('changes-') + 5
+
+    return changes_file[-5:]
+
+
+def get_sip_version(sip_dir):
+    return var_in_file(os.path.join(sip_dir, 'configure.py'), 'sip_version_str')
+
+
+def get_pyqt_version(pyqt_dir):
+    return var_in_file(os.path.join(pyqt_dir, 'configure.py'), 'pyqt_version_str')
+
+
+def var_in_file(file_path, var):
+    with open(file_path, 'r') as f:
+        contents = f.read()
+        return re.findall(var + r' = "(.+)"', contents)[0]
+
+
+def build(recipes, layout, debug, profile):
+    for pkg, build_f, src_dir in recipes:
+        util.print_box('Building %s' % pkg, src_dir)
+
+        with util.chdir(src_dir):
+            build_f(layout, debug, profile)
+
+
+def install_scripts(install_root):
+    shutil.copyfile(os.path.join(HERE, 'configure.py'), os.path.join(install_root, 'configure.py'))
+    shutil.copyfile(os.path.join(HERE, 'util.py'), os.path.join(install_root, 'util.py'))
+
+
+def package(install_root, archive_name):
+    parent, root_dir = os.path.split(install_root)
+
+    try:
+        t = tarfile.open(archive_name, 'w:gz')
+
+        with util.chdir(parent):
+            t.add(root_dir)
+    finally:
+        t.close()
 
 #
 # Build recipes
@@ -178,6 +263,10 @@ def build_qt(layout, debug, profile):
     # Configure: enable parallel build on Windows
     if sys.platform == 'win32':
         qt_configure_args.append('-mp')
+
+    # Configure: fast build if not on Windows
+    if sys.platform != 'win32':
+        qt_configure_args.append('-fast')
 
     # Build
     configure_qt(*qt_configure_args)
