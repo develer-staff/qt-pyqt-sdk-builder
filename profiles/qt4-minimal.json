@@ -1,5 +1,6 @@
 {
     "qt": {
+        "version": 4,
         "common": [
             "-accessibility",
             "-cups",
