@@ -10,48 +10,35 @@ For example, debug builds on Windows are linked to the release MSVCRT but still 
 files so that you don't have to recompile the whole world when debugging a PyQt application.
 
 
+## Platform Support Matrix
 
-
-## Platform Support
-
-Operating Systems:
-
-* OS X 10.9 and later.
-  * Only 64-bit builds are tested/supported.
-* Ubuntu 12.04 and later.
-  * Only 64-bit builds are tested/supported.
-* Windows 7 and later.
-  * Only 32-bit builds are tested/supported.
-
-Qt:
-
-* Qt 4.8.6
-* Qt 5.3.1
-
-Python:
+### Python
 
 * Python 2.7.8
 
-SIP/PyQt:
 
-* PyQt 4.11.1 and 5.3.1
-* SIP 4.16.1
+### Build Types
 
-Compilers:
+We usually build and test against the latest version of Qt 4, Qt 5, SIP and PyQt.
 
-* On Linux: GCC 4.4
-* On OS X: Clang Apple LLVM 5.1
-* On Windows: Visual C++ 2008 Express
-
+| Qt, SIP, PyQt versions            | OS X 10.9 | Ubuntu 12.04 | Windows 7 |
+|-----------------------------------|-----------|--------------|-----------|
+| Qt 4.8.6, SIP 4.16.2, PyQt 4.11.1 | 64-bit    | 64-bit       | 32-bit    |
+| Qt 5.3.1, SIP 4.16.2, PyQt 5.3.1  | 64-bit    | 64-bit       | 32-bit    |
 
 
+### Compilers
+
+|          | GCC | Clang | Visual Studio | MinGW |
+|----------|-----|-------|---------------|-------|
+| Linux    | Yes | No    | -             | -     |
+| OS X     | No  | Yes   | -             | -     |
+| Windows  | -   | -     | Yes (2008)    | No    |
 
 
 ## Usage
 
 WIP.
-
-
 
 
 ## Limitations
