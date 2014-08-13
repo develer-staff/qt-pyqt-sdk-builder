@@ -244,10 +244,6 @@ def build_qt(layout, debug, profile):
     if sys.platform == 'win32':
         qt_configure_args.append('-mp')
 
-    # Configure: fast build if not on Windows
-    if sys.platform != 'win32':
-        qt_configure_args.append('-fast')
-
     # Build
     configure_qt(*qt_configure_args)
     make()
