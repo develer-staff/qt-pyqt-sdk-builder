@@ -50,7 +50,7 @@ import util
 HERE = os.path.abspath(os.path.dirname(__file__))
 HOME = os.path.expanduser('~')
 PYQT_LICENSE_FILE = os.path.join(HERE, 'pyqt-commercial.sip')
-QT_LICENSE_FILE = os.path.join(HERE, 'qt-license')
+QT_LICENSE_FILE = os.path.join(HERE, 'qt-license.txt')
 
 
 def main():
