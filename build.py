@@ -78,9 +78,9 @@ def main():
     if args.install_root:
         install_root = args.install_root
     else:
-        qt_version = get_qt_version(args.with_qt_sources)
-        sip_version = get_sip_version(args.with_sip_sources)
-        pyqt_version = get_pyqt_version(args.with_pyqt_sources)
+        qt_version = extract_version(args.with_qt_sources)
+        sip_version = extract_version(args.with_sip_sources)
+        pyqt_version = extract_version(args.with_pyqt_sources)
         plat = sys.platform
         arch = platform.architecture()[0]
         build_type = 'debug' if args.debug else 'release'
@@ -122,6 +122,13 @@ def add_to_plan(plan, component_name, build_f, source_directory):
     plan.append((component_name, build_f, source_directory))
 
 
+def extract_version(path):
+    assert os.path.isdir(path)
+    found = re.findall(r'\d+\.\d+\.\d+', path)
+    assert len(found) == 1
+    return found[0]
+
+
 def prep(layout):
     make_install_root_skel(layout)
 
@@ -133,33 +140,6 @@ def make_install_root_skel(layout):
     for d in layout.values():
         if not os.path.isdir(d):
             os.makedirs(d)
-
-
-def get_qt_version(qt_dir):
-    globbed = glob.glob(os.path.join(qt_dir, 'changes-*'))
-
-    if not globbed:
-        raise IOError('Unable to find changes file in Qt directory: %s' % qt_dir)
-
-    changes_file = os.path.basename(globbed[0])
-
-    assert len(changes_file) == len('changes-') + 5
-
-    return changes_file[-5:]
-
-
-def get_sip_version(sip_dir):
-    return var_in_file(os.path.join(sip_dir, 'configure.py'), 'sip_version_str')
-
-
-def get_pyqt_version(pyqt_dir):
-    return var_in_file(os.path.join(pyqt_dir, 'configure.py'), 'pyqt_version_str')
-
-
-def var_in_file(file_path, var):
-    with open(file_path, 'r') as f:
-        contents = f.read()
-        return re.findall(var + r' = "(.+)"', contents)[0]
 
 
 def build(recipes, layout, debug, profile):
