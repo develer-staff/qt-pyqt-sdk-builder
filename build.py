@@ -64,6 +64,8 @@ def main():
     plan = []
 
     if sys.platform == 'darwin' or sys.platform == 'win32':
+        # We need to build ICU from sources only on OS X and Windows. On Ubuntu we can usually
+        # rely on ICU being installed system wide.
         add_to_plan(plan, 'icu', build_icu, args.with_icu_sources)
 
     add_to_plan(plan, 'qt', build_qt, args.with_qt_sources)
