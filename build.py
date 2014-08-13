@@ -60,6 +60,12 @@ def main():
     with open(args.profile, 'r') as f:
         profile = json.load(f)
 
+    # Autodiscover source directories, if possible.
+    args.with_icu_sources = args.with_icu_sources or find_source_dir('icu*')
+    args.with_qt_sources = args.with_qt_sources or find_source_dir('qt-everywhere-*')
+    args.with_sip_sources = args.with_sip_sources or find_source_dir('sip-*')
+    args.with_pyqt_sources = args.with_pyqt_sources or find_source_dir('PyQt-*')
+
     # Prepare the build plan
     plan = []
 
@@ -104,12 +110,21 @@ def parse_command_line():
     args_parser.add_argument('--install-root', type=str)
     args_parser.add_argument('--profile', type=str, required=True)
     args_parser.add_argument('--with-icu-sources', type=str)
-    args_parser.add_argument('--with-pyqt-sources', type=str, required=True)
-    args_parser.add_argument('--with-qt-sources', type=str, required=True)
-    args_parser.add_argument('--with-sip-sources', type=str, required=True)
+    args_parser.add_argument('--with-pyqt-sources', type=str)
+    args_parser.add_argument('--with-qt-sources', type=str)
+    args_parser.add_argument('--with-sip-sources', type=str)
     args_parser.add_argument('packages', metavar='packages', nargs='*')
 
     return args_parser.parse_args()
+
+
+def find_source_dir(glob_pattern):
+    candidates = [d for d in glob.glob(os.path.join(HERE, '_source', glob_pattern)) if os.path.isdir(d)]
+
+    if candidates:
+        return candidates[0]
+    else:
+        return None
 
 
 def add_to_plan(plan, component_name, build_f, source_directory):
