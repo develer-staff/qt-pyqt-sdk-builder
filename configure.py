@@ -115,11 +115,11 @@ def is_setup_done():
 
 
 def setup_environment(layout):
-    os.environ['QT_PYQT_SDK_SETUP_DONE'] = '1'
     os.environ['PATH'] = os.pathsep.join([os.path.join(layout['bin']), os.environ['PATH']])
     os.environ['PYTHONPATH'] = os.path.join(layout['python'])
     os.environ['QTDIR'] = os.path.join(layout['root'])
     os.environ['QT_PLUGIN_PATH'] = os.path.join(layout['plugins'])
+    os.environ['QT_PYQT_SDK_SETUP_DONE'] = '1'
 
     if sys.platform == 'linux2':
         os.environ['LD_LIBRARY_PATH'] = layout['lib']
@@ -132,10 +132,9 @@ def setup_environment(layout):
         msvc = MSVCCompiler()
         msvc.initialize()
 
-        os.environ['QMAKESPEC'] = 'win32-msvc2008'
-
         os.environ['INCLUDE'] = os.pathsep.join([layout['include'], os.environ['INCLUDE']])
         os.environ['LIB'] = os.pathsep.join([layout['lib'], os.environ['LIB']])
+        os.environ['QMAKESPEC'] = 'win32-msvc2008'
 
         os.environ['PATH'] = os.pathsep.join([
             os.environ['PATH'],
