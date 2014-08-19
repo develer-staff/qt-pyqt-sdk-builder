@@ -33,11 +33,12 @@ PyQt SDK generated using build.py
 from __future__ import print_function
 
 import argparse
-import fnmatch
 import fileinput
+import fnmatch
 import os
 import os.path
 import re
+import subprocess
 import sys
 
 import util
@@ -59,7 +60,9 @@ def main():
 
     setup_environment(layout)
 
-    if not args.no_subshell:
+    if args.command:
+        sys.exit(subprocess.call(args.command))
+    elif not args.no_subshell:
         util.start_subshell()
 
 
@@ -68,6 +71,7 @@ def parse_args():
     arg_parser.add_argument('-q', '--no-relocate', action='store_true')
     arg_parser.add_argument('-r', '--install-root', type=str, default=HERE, help='alternate install root')
     arg_parser.add_argument('-s', '--no-subshell', action='store_true')
+    arg_parser.add_argument('command', nargs='*', metavar='command', help='command (with arguments) to run within the SDK environment')
 
     return arg_parser.parse_args()
 
