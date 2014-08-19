@@ -24,12 +24,6 @@
 # SOFTWARE.
 #
 
-
-"""Configuration script that end-users can use to properly setup their environment when using a Qt +
-PyQt SDK generated using build.py
-
-"""
-
 from __future__ import print_function
 
 import argparse
