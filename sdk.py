@@ -40,9 +40,11 @@ def chdir(path):
     """Changes current working directory for the life of the context manager."""
     cwd = os.path.abspath(os.getcwd())
 
-    os.chdir(path)
-    yield
-    os.chdir(cwd)
+    try:
+        os.chdir(path)
+        yield
+    finally:
+        os.chdir(cwd)
 
 
 def get_layout(install_root):
