@@ -72,9 +72,9 @@ def get_layout(install_root):
     }
 
     # Sanity check
-    for d in layout.values():
-        if not os.path.isdir(d):
-            print('WARNING: Missing required directory %s' % d)
+    for path in layout.values():
+        if not os.path.isdir(path):
+            print('WARNING: Missing required directory %s' % path)
 
     sipconfig = os.path.join(layout['python'], 'sipconfig.py')
 
@@ -115,8 +115,8 @@ def sh(*args):
 def die(*args):
     print('')
 
-    for m in args:
-        print(m)
+    for message in args:
+        print(message)
 
     print('Aborting.')
 
