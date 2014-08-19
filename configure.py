@@ -98,9 +98,9 @@ def relocate_sip(layout):
 
     wrong_path = data["_pkg_config"]["sip_mod_dir"].encode("string-escape")
 
-    for L in fileinput.FileInput(sipconfig, inplace=True):
-        L = L.replace(wrong_path, layout['root'].encode("string-escape"))
-        sys.stdout.write(L)
+    for line in fileinput.FileInput(sipconfig, inplace=True):
+        line = line.replace(wrong_path, layout['root'].encode("string-escape"))
+        sys.stdout.write(line)
 
 
 def is_setup_done():
