@@ -57,15 +57,17 @@ def main():
         relocate_qt(layout)
         relocate_sip(layout)
 
-    if not args.only_relocate:
-        setup_environment(layout)
+    setup_environment(layout)
+
+    if not args.no_subshell:
         util.start_subshell()
 
 
 def parse_args():
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument('-r', '--install-root', type=str, default=HERE, help='alternate install root')
     arg_parser.add_argument('-q', '--no-relocate', action='store_true')
+    arg_parser.add_argument('-r', '--install-root', type=str, default=HERE, help='alternate install root')
+    arg_parser.add_argument('-s', '--no-subshell', action='store_true')
 
     return arg_parser.parse_args()
 
