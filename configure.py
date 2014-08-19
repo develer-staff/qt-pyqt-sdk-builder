@@ -77,9 +77,8 @@ def relocate_qt(layout):
         qt_conf.write('[Paths]\n')
         qt_conf.write('Prefix = %s\n' % layout['root'].replace("\\", "/"))
 
-    # PRL files (used by qmake) include hardcoded paths to libraries, which makes impossible to
-    # use qmake on any different system; the fix is to parametrize the libraries path and add the
-    # variable definition at the start of each .prl
+    # .prl files have the library search path hardcoded at install time. We have to rewrite the
+    # library search path so that it points to the current location of the SDK on disk.
     linker_path = re.compile(r'\s-L[/\w._]+\s')
 
     for root, _, filenames in os.walk(layout['root']):
