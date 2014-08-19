@@ -100,7 +100,6 @@ def relocate_sip(layout):
     # sipconfig.py contains hardcoded paths specific to the system which made the build.
     data = {}
     sipconfig = os.path.join(layout['python'], 'sipconfig.py')
-
     execfile(sipconfig, data)
 
     wrong_path = data["_pkg_config"]["sip_mod_dir"].encode("string-escape")
