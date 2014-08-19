@@ -60,6 +60,7 @@ def get_layout(install_root):
     """
     rootdir = os.path.abspath(install_root)
     pydir = 'python%s.%s' % sys.version_info[:2]
+
     layout = {
         'root': rootdir,                               # Installation root
         'bin': os.path.join(rootdir, 'bin'),           # Executables
