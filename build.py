@@ -27,7 +27,6 @@
 from __future__ import print_function
 
 import argparse
-import collections
 import fnmatch
 import glob
 import json
@@ -37,7 +36,6 @@ import os.path
 import platform
 import re
 import shutil
-import subprocess
 import sys
 import tarfile
 
@@ -57,8 +55,8 @@ def main():
     args = parse_command_line()
 
     # Load build profile
-    with open(args.profile, 'r') as f:
-        profile = json.load(f)
+    with open(args.profile, 'r') as profile_json:
+        profile = json.load(profile_json)
 
     # Autodiscover source directories, if possible.
     args.with_icu_sources = args.with_icu_sources or find_source_dir('icu*')
@@ -67,6 +65,7 @@ def main():
     args.with_pyqt_sources = args.with_pyqt_sources or find_source_dir('PyQt-*')
 
     # Prepare the build plan
+    # plan :: (component_name, build_function, abs_source_directory_path)
     plan = []
 
     if sys.platform == 'darwin' or sys.platform == 'win32':
@@ -80,7 +79,7 @@ def main():
 
     # If user specified some packages on the command line, build only those
     if args.packages:
-        plan = filter(lambda x: x[0] in args.packages, plan)
+        plan = [entry for entry in plan if entry[0] in args.packages]
 
     # Determine install root
     if args.install_root:
@@ -133,7 +132,7 @@ def add_to_plan(plan, component_name, build_f, source_directory):
         sys.exit(1)
 
     if not os.path.isdir(source_directory):
-        print('%s: No such directory: %s' % (compenent_name, source_directory))
+        print('%s: No such directory: %s' % (component_name, source_directory))
         sys.exit(1)
 
     plan.append((component_name, build_f, source_directory))
@@ -149,14 +148,14 @@ def extract_version(path):
 def prep(layout):
     make_install_root_skel(layout)
 
-    import configure
-    configure.setup_environment(layout)
+    sdk_configure = __import__('configure')
+    sdk_configure.setup_environment(layout)
 
 
 def make_install_root_skel(layout):
-    for d in layout.values():
-        if not os.path.isdir(d):
-            os.makedirs(d)
+    for path in layout.values():
+        if not os.path.isdir(path):
+            os.makedirs(path)
 
 
 def build(recipes, layout, debug, profile):
@@ -168,20 +167,20 @@ def build(recipes, layout, debug, profile):
 
 
 def install_scripts(install_root):
-    shsdk.copyfile(os.path.join(HERE, 'configure.py'), os.path.join(install_root, 'configure.py'))
-    shsdk.copyfile(os.path.join(HERE, 'sdk.py'), os.path.join(install_root, 'sdk.py'))
+    shutil.copyfile(os.path.join(HERE, 'configure.py'), os.path.join(install_root, 'configure.py'))
+    shutil.copyfile(os.path.join(HERE, 'sdk.py'), os.path.join(install_root, 'sdk.py'))
 
 
 def package(install_root, archive_name):
     parent, root_dir = os.path.split(install_root)
 
     try:
-        t = tarfile.open(archive_name, 'w:gz')
+        tar_file = tarfile.open(archive_name, 'w:gz')
 
         with sdk.chdir(parent):
-            t.add(root_dir)
+            tar_file.add(root_dir)
     finally:
-        t.close()
+        tar_file.close()
 
 #
 # Build recipes
@@ -211,17 +210,17 @@ def build_icu(layout, debug, profile):
 
 def build_qt(layout, debug, profile):
     if os.path.isfile(QT_LICENSE_FILE):
-        license = '-commercial'
+        qt_license = '-commercial'
 
-        shsdk.copy(QT_LICENSE_FILE, os.path.join(HOME, ".qt-license"))
+        shutil.copy(QT_LICENSE_FILE, os.path.join(HOME, ".qt-license"))
     else:
-        license = '-opensource'
+        qt_license = '-opensource'
 
     # Bootstrap configure.exe on Windows so that we can re-use the UNIX source
     # tarball which doesn't have configure.exe pre-built like the Win32
     # version. To do this, we 'touch' qtbase\.gitignore.
     if is_qt5():
-        with open(os.path.join('qtbase', '.gitignore'), 'w') as f:
+        with open(os.path.join('qtbase', '.gitignore'), 'w'):
             pass
 
     # Configure
@@ -229,7 +228,7 @@ def build_qt(layout, debug, profile):
         '-confirm-license',
         '-prefix', layout['root'],
         '-shared',
-        license
+        qt_license
     ]
 
     # Configure: load profile
@@ -240,7 +239,7 @@ def build_qt(layout, debug, profile):
 
     # Configure: debug build?
     if debug and sys.platform == 'win32':
-        shsdk.copyfile(os.path.join(HERE, 'mkspecs', 'qt4-win32-msvc2008-relwithdebinfo.conf'), os.path.join('mkspecs', 'win32-msvc2008', 'qmake.conf'))
+        shutil.copyfile(os.path.join(HERE, 'mkspecs', 'qt4-win32-msvc2008-relwithdebinfo.conf'), os.path.join('mkspecs', 'win32-msvc2008', 'qmake.conf'))
 
         qt_configure_args.append('-release')
     elif debug:
@@ -267,7 +266,7 @@ def build_qt(layout, debug, profile):
     make('install')
 
     # Delete all libtool's .la files
-    for root, dirnames, filenames in os.walk(layout['root']):
+    for root, _, filenames in os.walk(layout['root']):
         for filename in fnmatch.filter(filenames, '*.la'):
             os.remove(os.path.join(root, filename))
 
@@ -289,7 +288,7 @@ def build_sip(layout, debug, profile):
 
 def build_pyqt(layout, debug, profile):
     if os.path.isfile(PYQT_LICENSE_FILE):
-        shsdk.copyfile(PYQT_LICENSE_FILE, os.path.join('sip', 'pyqt-commercial.sip'))
+        shutil.copyfile(PYQT_LICENSE_FILE, os.path.join('sip', 'pyqt-commercial.sip'))
 
     # Configure
     configure_args = [
