@@ -53,10 +53,8 @@ def main():
     args = parse_args()
     layout = util.get_layout(args.install_root)
 
-    if not args.no_relocate_qt:
+    if not args.no_relocate:
         relocate_qt(layout)
-
-    if not args.no_relocate_sip:
         relocate_sip(layout)
 
     if not args.only_relocate:
@@ -67,9 +65,7 @@ def main():
 def parse_args():
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('-i', '--install-root', type=str, default=HERE, help='alternate install root')
-    arg_parser.add_argument('-q', '--no-relocate-qt', action='store_true')
-    arg_parser.add_argument('-r', '--only-relocate', action='store_true')
-    arg_parser.add_argument('-s', '--no-relocate-sip', action='store_true')
+    arg_parser.add_argument('-q', '--no-relocate', action='store_true')
 
     return arg_parser.parse_args()
 
