@@ -37,6 +37,7 @@ import sys
 
 @contextlib.contextmanager
 def chdir(path):
+    """Changes current working directory for the life of the context manager."""
     cwd = os.path.abspath(os.getcwd())
 
     os.chdir(path)
