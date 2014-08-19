@@ -41,7 +41,7 @@ import re
 import subprocess
 import sys
 
-import util
+import sdk
 
 
 HERE = os.path.abspath(os.path.dirname(__file__))
@@ -49,10 +49,10 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 
 def main():
     if is_setup_done():
-        util.die('SDK setup already done.')
+        sdk.die('SDK setup already done.')
 
     args = parse_args()
-    layout = util.get_layout(args.install_root)
+    layout = sdk.get_layout(args.install_root)
 
     if not args.no_relocate:
         relocate_qt(layout)
@@ -63,7 +63,7 @@ def main():
     if args.command:
         sys.exit(subprocess.call(args.command))
     elif not args.no_subshell:
-        util.start_subshell()
+        sdk.start_subshell()
 
 
 def parse_args():

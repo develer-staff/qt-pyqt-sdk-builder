@@ -41,7 +41,7 @@ import subprocess
 import sys
 import tarfile
 
-import util
+import sdk
 
 #
 # Paths
@@ -95,7 +95,7 @@ def main():
         install_root = os.path.join(HERE, '_out', 'qt-%s-sip-%s-pyqt-%s-%s-%s-%s' % (qt_version, sip_version, pyqt_version, plat, arch, build_type))
 
     # Get this installation's layout
-    layout = util.get_layout(install_root)
+    layout = sdk.get_layout(install_root)
 
     # Build
     prep(layout)
@@ -161,15 +161,15 @@ def make_install_root_skel(layout):
 
 def build(recipes, layout, debug, profile):
     for pkg, build_f, src_dir in recipes:
-        util.print_box('Building %s' % pkg, src_dir)
+        sdk.print_box('Building %s' % pkg, src_dir)
 
-        with util.chdir(src_dir):
+        with sdk.chdir(src_dir):
             build_f(layout, debug, profile)
 
 
 def install_scripts(install_root):
-    shutil.copyfile(os.path.join(HERE, 'configure.py'), os.path.join(install_root, 'configure.py'))
-    shutil.copyfile(os.path.join(HERE, 'util.py'), os.path.join(install_root, 'util.py'))
+    shsdk.copyfile(os.path.join(HERE, 'configure.py'), os.path.join(install_root, 'configure.py'))
+    shsdk.copyfile(os.path.join(HERE, 'sdk.py'), os.path.join(install_root, 'sdk.py'))
 
 
 def package(install_root, archive_name):
@@ -178,7 +178,7 @@ def package(install_root, archive_name):
     try:
         t = tarfile.open(archive_name, 'w:gz')
 
-        with util.chdir(parent):
+        with sdk.chdir(parent):
             t.add(root_dir)
     finally:
         t.close()
@@ -193,27 +193,27 @@ def build_icu(layout, debug, profile):
     os.chdir('source')
 
     if sys.platform == 'darwin':
-        util.sh('chmod', '+x', 'configure', 'runConfigureICU')
-        util.sh('bash', 'runConfigureICU', 'MacOSX', '--prefix=%s' % layout['root'], '--disable-debug', '--enable-release')
-        util.sh('make')
-        util.sh('make', 'install')
+        sdk.sh('chmod', '+x', 'configure', 'runConfigureICU')
+        sdk.sh('bash', 'runConfigureICU', 'MacOSX', '--prefix=%s' % layout['root'], '--disable-debug', '--enable-release')
+        sdk.sh('make')
+        sdk.sh('make', 'install')
     elif sys.platform == 'win32':
         # Convert native install_root path to one accepted by Cygwin (e.g.: /cygdrive/c/foo/bar)
         cy_install_root = layout['root'].replace('\\', '/')
         cy_install_root = cy_install_root.replace('C:/', '/cygdrive/c/')
 
-        util.sh('bash', 'runConfigureICU', 'Cygwin/MSVC', '--prefix=%s' % cy_install_root, '--disable-debug', '--enable-release')
-        util.sh('bash', '-c', 'make')  # We have to use GNU make here, so no make() wrapper...
-        util.sh('bash', '-c', 'make install')
+        sdk.sh('bash', 'runConfigureICU', 'Cygwin/MSVC', '--prefix=%s' % cy_install_root, '--disable-debug', '--enable-release')
+        sdk.sh('bash', '-c', 'make')  # We have to use GNU make here, so no make() wrapper...
+        sdk.sh('bash', '-c', 'make install')
     else:
-        util.die('You have to rebuild ICU only on OS X or Windows')
+        sdk.die('You have to rebuild ICU only on OS X or Windows')
 
 
 def build_qt(layout, debug, profile):
     if os.path.isfile(QT_LICENSE_FILE):
         license = '-commercial'
 
-        shutil.copy(QT_LICENSE_FILE, os.path.join(HOME, ".qt-license"))
+        shsdk.copy(QT_LICENSE_FILE, os.path.join(HOME, ".qt-license"))
     else:
         license = '-opensource'
 
@@ -240,7 +240,7 @@ def build_qt(layout, debug, profile):
 
     # Configure: debug build?
     if debug and sys.platform == 'win32':
-        shutil.copyfile(os.path.join(HERE, 'mkspecs', 'qt4-win32-msvc2008-relwithdebinfo.conf'), os.path.join('mkspecs', 'win32-msvc2008', 'qmake.conf'))
+        shsdk.copyfile(os.path.join(HERE, 'mkspecs', 'qt4-win32-msvc2008-relwithdebinfo.conf'), os.path.join('mkspecs', 'win32-msvc2008', 'qmake.conf'))
 
         qt_configure_args.append('-release')
     elif debug:
@@ -289,7 +289,7 @@ def build_sip(layout, debug, profile):
 
 def build_pyqt(layout, debug, profile):
     if os.path.isfile(PYQT_LICENSE_FILE):
-        shutil.copyfile(PYQT_LICENSE_FILE, os.path.join('sip', 'pyqt-commercial.sip'))
+        shsdk.copyfile(PYQT_LICENSE_FILE, os.path.join('sip', 'pyqt-commercial.sip'))
 
     # Configure
     configure_args = [
@@ -322,7 +322,7 @@ def is_qt5():
 
 
 def configure(*args):
-    util.sh(sys.executable, 'configure.py', *args)
+    sdk.sh(sys.executable, 'configure.py', *args)
 
 
 def configure_qt(*args):
@@ -331,14 +331,14 @@ def configure_qt(*args):
     else:
         configure_exe = './configure'
 
-    util.sh(configure_exe, *args)
+    sdk.sh(configure_exe, *args)
 
 
 def make(*args):
     if sys.platform == 'win32':
-        util.sh('nmake', *args)
+        sdk.sh('nmake', *args)
     else:
-        util.sh('make', '-j%s' % str(multiprocessing.cpu_count() + 1), *args)
+        sdk.sh('make', '-j%s' % str(multiprocessing.cpu_count() + 1), *args)
 
 
 def set_pyqt_debug_flags(debug, configure_args):
