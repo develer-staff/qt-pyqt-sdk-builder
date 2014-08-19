@@ -64,7 +64,7 @@ def main():
 
 def parse_args():
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument('-i', '--install-root', type=str, default=HERE, help='alternate install root')
+    arg_parser.add_argument('-r', '--install-root', type=str, default=HERE, help='alternate install root')
     arg_parser.add_argument('-q', '--no-relocate', action='store_true')
 
     return arg_parser.parse_args()
