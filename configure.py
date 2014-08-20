@@ -63,7 +63,7 @@ def main():
 def parse_args():
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('-q', '--no-relocate', action='store_true')
-    arg_parser.add_argument('-r', '--install-root', type=str, default=HERE, help='alternate install root')
+    arg_parser.add_argument('-r', '--install-root', type=str, default=HERE, help='SDK installation root')
     arg_parser.add_argument('-s', '--no-subshell', action='store_true')
     arg_parser.add_argument('command', nargs='*', metavar='command', help='command (with arguments) to run within the SDK environment')
 
