@@ -252,6 +252,10 @@ def build_qt(layout, debug, profile):
         qt_configure_args.extend(['-I', os.path.join(layout['root'], 'include')])
         qt_configure_args.extend(['-L', os.path.join(layout['root'], 'lib')])
 
+    # Copy stdint.h otherwise we can't build WebKit on Windows
+    if sys.platform == 'win32':
+        shutil.copy(os.path.join(HERE, 'stdint-msvc.h'), os.path.join(layout['include'], 'stdint.h'))
+
     # Configure: build Qt 4 with clang on OS X
     if sys.platform == 'darwin' and os.path.isfile('/usr/bin/clang') and not is_qt5():
         qt_configure_args.extend(['-platform', 'unsupported/macx-clang'])
