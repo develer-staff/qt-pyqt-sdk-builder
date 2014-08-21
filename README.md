@@ -49,7 +49,8 @@ Install [Homebrew](http://brew.sh/) which will also install the compiler.
 
 Install all dependencies through apt-get:
 
-    sudo apt-get install -y libcups2-dev libicu-dev libxrender-dev python-dev
+    sudo apt-get build-dep -y qt4-x11
+    sudo apt-get install -y bison gperf libcups2-dev libicu-dev python-dev ruby
 
 Symlink Python headers to `/usr/local` (due to a bug in PyQt 5):
 
@@ -62,17 +63,28 @@ Install [just-install](http://www.just-install.it/):
 
     powershell -Command "(New-Object System.Net.WebClient).DownloadFile(\"http://go.just-install.it\", \"${env:WinDir}\\\\just-install.exe\")"
 
-Install Perl, Python, Ruby, and all other dependencies:
+Install Cygwin, Perl, Python, Ruby, and Visual C++ Express 2008 [^1]:
 
     just-install update
     just-install cygwin perl python27 ruby vc2008express
 
+Install ​Binutils, Bison, ​GPerf, ​Grep, ​Flex and ​Make:
+
+    %TEMP%\DF0B8299.exe -q -P binutils -P bison -P gperf -P grep -P flex -P make
+
 
 ## Usage
 
-WIP.
+Work in progress.
 
 
 ## Limitations
 
 Only dynamically linked versions of Qt and PyQt are currently supported.
+
+
+## Footnotes
+
+[1]: `%TEMP%\DF0B8299.exe` is the location where just-install downloads the Cygwin installer, the
+     odd file name is due to just-install using CRC32 of the download URL as the file name for
+     temporary files.
