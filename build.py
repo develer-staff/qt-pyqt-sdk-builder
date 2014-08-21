@@ -49,6 +49,7 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 HOME = os.path.expanduser('~')
 PYQT_LICENSE_FILE = os.path.join(HERE, 'pyqt-commercial.sip')
 QT_LICENSE_FILE = os.path.join(HERE, 'qt-license.txt')
+SUPPORT_DIR = os.path.join(HERE, 'support')
 
 
 def main():
@@ -243,7 +244,9 @@ def build_qt(layout, debug, profile):
     # Enable proper release + debug .pdb files on Windows
     if debug:
         if sys.platform == 'win32':
-            shutil.copyfile(os.path.join(HERE, 'mkspecs', 'qt4-win32-msvc2008-relwithdebinfo.conf'), os.path.join('mkspecs', 'win32-msvc2008', 'qmake.conf'))
+            mkspec_file_name = 'qt%s-msvc2008-release-with-debuginfo.conf' % profile['qt']['version']
+
+            shutil.copyfile(os.path.join(SUPPORT_DIR, mkspec_file_name), os.path.join('mkspecs', 'win32-msvc2008', 'qmake.conf'))
             qt_configure_args.append('-release')
         else:
             qt_configure_args.append('-debug')
@@ -257,7 +260,7 @@ def build_qt(layout, debug, profile):
 
     if sys.platform == 'win32':
         # VC++ doesn't have stdint.h (required by WebKit)
-        shutil.copy(os.path.join(HERE, 'stdint-msvc.h'), os.path.join(layout['include'], 'stdint.h'))
+        shutil.copy(os.path.join(SUPPORT_DIR, 'stdint-msvc.h'), os.path.join(layout['include'], 'stdint.h'))
 
         # Add gnuwin32 to the PATH (required by WebKit)
         qt_source_dir = os.path.abspath(os.getcwd())
