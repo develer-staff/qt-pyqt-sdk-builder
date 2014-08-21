@@ -36,6 +36,38 @@ We usually build and test against the latest version of Qt 4, Qt 5, SIP and PyQt
 | Windows  | -   | -     | Yes (2008)    | No    |
 
 
+## Installing Dependencies
+
+### OS X
+
+Install [Homebrew](http://brew.sh/) which will also install the compiler.
+
+    ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
+
+
+### Ubuntu
+
+Install all dependencies through apt-get:
+
+    sudo apt-get install -y libcups2-dev libicu-dev libxrender-dev python-dev
+
+Symlink Python headers to `/usr/local` (due to a bug in PyQt 5):
+
+    ln -sf /usr/include/python2.7 /usr/local/include/python2.7
+
+
+### Windows
+
+Install [just-install](http://www.just-install.it/):
+
+    powershell -Command "(New-Object System.Net.WebClient).DownloadFile(\"http://go.just-install.it\", \"${env:WinDir}\\\\just-install.exe\")"
+
+Install Perl, Python, Ruby, and all other dependencies:
+
+    just-install update
+    just-install cygwin perl python27 ruby vc2008express
+
+
 ## Usage
 
 WIP.

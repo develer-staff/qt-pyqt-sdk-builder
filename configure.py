@@ -46,28 +46,33 @@ def main():
         sdk.die('SDK setup already done.')
 
     args = parse_args()
-    layout = sdk.get_layout(args.install_root)
 
-    if not args.no_relocate:
-        relocate_qt(layout)
-        relocate_sip(layout)
-
-    setup_environment(layout)
+    setup(args.install_root, args.relocate)
 
     if args.command:
         sys.exit(subprocess.call(args.command))
-    elif not args.no_subshell:
+    elif args.shell:
         sdk.start_subshell()
 
 
 def parse_args():
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument('-q', '--no-relocate', action='store_true')
+    arg_parser.add_argument('-q', '--relocate', action='store_false')
     arg_parser.add_argument('-r', '--install-root', type=str, default=HERE, help='SDK installation root')
-    arg_parser.add_argument('-s', '--no-subshell', action='store_true')
+    arg_parser.add_argument('-s', '--shell', action='store_false')
     arg_parser.add_argument('command', nargs='*', metavar='command', help='command (with arguments) to run within the SDK environment')
 
     return arg_parser.parse_args()
+
+
+def setup(install_root, relocate=True):
+    layout = sdk.get_layout(install_root)
+
+    if relocate:
+        relocate_qt(layout)
+        relocate_sip(layout)
+
+    setup_environment(layout)
 
 
 def relocate_qt(layout):
