@@ -107,14 +107,14 @@ def main():
 
 def parse_command_line():
     args_parser = argparse.ArgumentParser()
-    args_parser.add_argument('--debug', action='store_true')
-    args_parser.add_argument('--install-root', type=str)
-    args_parser.add_argument('--make-package', action='store_true')
-    args_parser.add_argument('--profile', type=str, required=True)
-    args_parser.add_argument('--with-icu-sources', type=str)
-    args_parser.add_argument('--with-pyqt-sources', type=str)
-    args_parser.add_argument('--with-qt-sources', type=str)
-    args_parser.add_argument('--with-sip-sources', type=str)
+    args_parser.add_argument('-d', '--debug', action='store_true')
+    args_parser.add_argument('-i', '--install-root', type=str)
+    args_parser.add_argument('-m', '--make-package', action='store_true')
+    args_parser.add_argument('-p', '--profile', type=str, required=True)
+    args_parser.add_argument('-c', '--with-icu-sources', type=str)
+    args_parser.add_argument('-t', '--with-pyqt-sources', type=str)
+    args_parser.add_argument('-q', '--with-qt-sources', type=str)
+    args_parser.add_argument('-s', '--with-sip-sources', type=str)
     args_parser.add_argument('packages', metavar='packages', nargs='*')
 
     return args_parser.parse_args()
