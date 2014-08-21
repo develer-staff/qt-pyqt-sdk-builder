@@ -234,38 +234,36 @@ def build_qt(layout, debug, profile):
         qt_license
     ]
 
-    # Configure: load profile
+    # Load build profile
     qt_configure_args.extend(profile['qt']['common'])
 
     if sys.platform in profile['qt']:
         qt_configure_args.extend(profile['qt'][sys.platform])
 
-    # Configure: debug build?
-    if debug and sys.platform == 'win32':
-        shutil.copyfile(os.path.join(HERE, 'mkspecs', 'qt4-win32-msvc2008-relwithdebinfo.conf'), os.path.join('mkspecs', 'win32-msvc2008', 'qmake.conf'))
-
-        qt_configure_args.append('-release')
-    elif debug:
-        qt_configure_args.append('-debug')
+    # Enable proper release + debug .pdb files on Windows
+    if debug:
+        if sys.platform == 'win32':
+            shutil.copyfile(os.path.join(HERE, 'mkspecs', 'qt4-win32-msvc2008-relwithdebinfo.conf'), os.path.join('mkspecs', 'win32-msvc2008', 'qmake.conf'))
+            qt_configure_args.append('-release')
+        else:
+            qt_configure_args.append('-debug')
     else:
         qt_configure_args.append('-release')
 
-    # Configure: have the compiler find our local copy of ICU
+    # Have the compiler find our local copy of ICU
     if sys.platform == 'darwin' or sys.platform == 'win32':
         qt_configure_args.extend(['-I', os.path.join(layout['root'], 'include')])
         qt_configure_args.extend(['-L', os.path.join(layout['root'], 'lib')])
 
-    # Copy stdint.h otherwise we can't build WebKit on Windows
     if sys.platform == 'win32':
+        # VC++ doesn't have stdint.h (required by WebKit)
         shutil.copy(os.path.join(HERE, 'stdint-msvc.h'), os.path.join(layout['include'], 'stdint.h'))
 
-    # Configure: build Qt 4 with clang on OS X
+        qt_configure_args.append('-mp')
+
+    # Build Qt 4 with clang on OS X
     if sys.platform == 'darwin' and os.path.isfile('/usr/bin/clang') and not is_qt5():
         qt_configure_args.extend(['-platform', 'unsupported/macx-clang'])
-
-    # Configure: enable parallel build on Windows
-    if sys.platform == 'win32':
-        qt_configure_args.append('-mp')
 
     # Build
     configure_qt(*qt_configure_args)
