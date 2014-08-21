@@ -100,13 +100,16 @@ def main():
     prep(layout)
     build(plan, layout, args.debug, profile)
     install_scripts(install_root)
-    package(install_root, '%s.tar.gz' % (os.path.basename(install_root)))
+
+    if args.make_package:
+        package(install_root, '%s.tar.gz' % (os.path.basename(install_root)))
 
 
 def parse_command_line():
     args_parser = argparse.ArgumentParser()
     args_parser.add_argument('--debug', action='store_true')
     args_parser.add_argument('--install-root', type=str)
+    args_parser.add_argument('--make-package', action='store_true')
     args_parser.add_argument('--profile', type=str, required=True)
     args_parser.add_argument('--with-icu-sources', type=str)
     args_parser.add_argument('--with-pyqt-sources', type=str)
