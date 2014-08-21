@@ -259,6 +259,13 @@ def build_qt(layout, debug, profile):
         # VC++ doesn't have stdint.h (required by WebKit)
         shutil.copy(os.path.join(HERE, 'stdint-msvc.h'), os.path.join(layout['include'], 'stdint.h'))
 
+        # Add gnuwin32 to the PATH (required by WebKit)
+        qt_source_dir = os.path.abspath(os.getcwd())
+        os.environ['PATH'] = os.pathsep.join([
+            os.path.join(qt_source_dir, 'gnuwin32', 'bin'),
+            os.environ['PATH']
+        ])
+
         qt_configure_args.append('-mp')
 
     # Build Qt 4 with clang on OS X
