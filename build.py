@@ -109,7 +109,7 @@ def main():
 def parse_command_line():
     args_parser = argparse.ArgumentParser()
     args_parser.add_argument('-d', '--debug', action='store_true')
-    args_parser.add_argument('-i', '--install-root', type=str)
+    args_parser.add_argument('-r', '--install-root', type=str)
     args_parser.add_argument('-m', '--make-package', action='store_true')
     args_parser.add_argument('-p', '--profile', type=str, required=True)
     args_parser.add_argument('-c', '--with-icu-sources', type=str)
