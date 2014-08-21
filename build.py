@@ -266,6 +266,7 @@ def build_qt(layout, debug, profile):
             os.environ['PATH']
         ])
 
+        # Enable parallel build
         qt_configure_args.append('-mp')
 
     # Build Qt 4 with clang on OS X
