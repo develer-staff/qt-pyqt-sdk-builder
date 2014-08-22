@@ -63,10 +63,3 @@ Work in progress.
 ## Limitations
 
 Only dynamically linked versions of Qt and PyQt are currently supported.
-
-
-## Footnotes
-
-[1]: `%TEMP%\DF0B8299.exe` is the location where just-install downloads the Cygwin installer, the
-     odd file name is due to just-install using CRC32 of the download URL as the file name for
-     temporary files.
