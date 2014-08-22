@@ -101,7 +101,7 @@ def relocate_sip(layout):
     sipconfig = os.path.join(layout['python'], 'sipconfig.py')
     execfile(sipconfig, data)
 
-    wrong_path = data["_pkg_config"]["sip_mod_dir"].encode("string-escape")
+    wrong_path = os.path.split(data["_pkg_config"]["sip_mod_dir"].encode("string-escape"))[0]
 
     for line in fileinput.FileInput(sipconfig, inplace=True):
         line = line.replace(wrong_path, layout['root'].encode("string-escape"))
