@@ -97,15 +97,21 @@ def relocate_qt(layout):
 
 def relocate_sip(layout):
     # sipconfig.py contains hardcoded paths specific to the system which made the build.
-    data = {}
     sipconfig = os.path.join(layout['python'], 'sipconfig.py')
-    execfile(sipconfig, data)
-
-    wrong_path = os.path.split(data["_pkg_config"]["sip_mod_dir"].encode("string-escape"))[0]
+    path_map = {
+        'default_sip_dir': layout['sip'],
+        'sip_bin': os.path.join(layout['bin'], 'sip.exe' if sys.platform == 'win32' else 'sip'),
+        'sip_inc_dir': layout['include'],
+        'sip_mod_dir': layout['python'],
+    }
 
     for line in fileinput.FileInput(sipconfig, inplace=True):
-        line = line.replace(wrong_path, layout['root'].encode("string-escape"))
-        sys.stdout.write(line)
+        for key, new_path in path_map.iteritems():
+            if re.findall(ur'\'%s\':\s+\'.+\',' % key, line):
+                sys.stdout.write("    '%s': %r,\n" % (key, new_path))
+                break
+        else:
+            sys.stdout.write(line)
 
 
 def is_setup_done():
