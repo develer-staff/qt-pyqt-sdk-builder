@@ -100,9 +100,9 @@ def main():
     # Build
     prep(layout)
     build(plan, layout, args.debug, profile)
-    install_scripts(install_root)
 
     if args.make_package:
+        install_scripts(install_root)
         package(install_root, '%s.tar.gz' % (os.path.basename(install_root)))
 
 
