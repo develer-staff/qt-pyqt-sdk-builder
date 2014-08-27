@@ -23,8 +23,9 @@
 # SOFTWARE.
 #
 
-apt-get update
-apt-get build-dep -y qt4-x11
+apt-get build-dep qt4-x11
+apt-get install "libx11.*" "libxcb.*"
 apt-get install -y bison gperf libcups2-dev libicu-dev python-dev ruby
 
+# Work-around a bug in PyQt5.
 ln -sf /usr/include/python2.7 /usr/local/include/python2.7
