@@ -26,12 +26,12 @@ EOF
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.provider "virtualbox" do |v|
         v.gui = true
-        v.memory = 2048
+        v.memory = 4096
     end
 
     config.vm.provider "vmware_fusion" do |v|
         v.gui = true
-        v.vmx["memsize"] = "2048"
+        v.vmx["memsize"] = "4096"
     end
 
     #
@@ -39,7 +39,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     #
 
     config.vm.define "windows" do |config|
-        config.vm.base_mac = "080027D27E35"
         config.vm.box = "lvillani/win2008r2-web"
         config.vm.provision "shell", inline: PROVISION_WINDOWS
     end
