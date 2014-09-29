@@ -25,7 +25,28 @@
 
 apt-get build-dep qt4-x11
 apt-get install "libx11.*" "libxcb.*"
-apt-get install -y bison gperf libcups2-dev libdbus-1-dev libgl1-mesa-dev libicu-dev python-dev ruby
+apt-get install -y bison \
+    gperf \
+    libasound2-dev \
+    libcap-dev \
+    libcups2-dev \
+    libdbus-1-dev \
+    libfontconfig1-dev \
+    libgl1-mesa-dev \
+    libicu-dev \
+    libnss3-dev \
+    libpci-dev \
+    libpulse-dev \
+    libudev-dev \
+    libxcomposite-dev \
+    libxcursor-dev \
+    libxdamage-dev \
+    libxi-dev \
+    libxrandr-dev \
+    libxtst-dev \
+    python-dev \
+    re2c \
+    ruby
 
 # Work-around a bug in PyQt5.
 ln -sf /usr/include/python2.7 /usr/local/include/python2.7
