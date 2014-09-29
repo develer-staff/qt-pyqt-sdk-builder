@@ -1,0 +1,56 @@
+{
+    "qt": {
+        "version": 5,
+        "common": [
+            "-accessibility",
+            "-confirm-license",
+            "-cups",
+            "-icu",
+            "-no-c++11",
+            "-no-compile-examples",
+            "-no-iconv",
+            "-no-nis",
+            "-no-openssl",
+            "-no-qml-debug",
+            "-no-sql-sqlite",
+            "-nomake", "examples",
+            "-opengl", "desktop",
+            "-qt-libjpeg",
+            "-qt-libpng",
+            "-qt-pcre",
+            "-qt-zlib",
+            "-skip", "qtactiveqt",
+            "-skip", "qtandroidextras",
+            "-skip", "qtdoc",
+            "-skip", "qtenginio",
+            "-skip", "qtgraphicaleffects",
+            "-skip", "qtmacextras",
+            "-skip", "qtquick1",
+            "-skip", "qtquickcontrols",
+            "-skip", "qtscript",
+            "-skip", "qtwebkit",
+            "-skip", "qtwebkit-examples",
+            "-skip", "qtwebsockets",
+            "-skip", "qtwinextras",
+            "-skip", "qtx11extras"
+        ],
+        "darwin": [
+            "-no-framework",
+            "-no-glib"
+        ],
+        "linux2": [
+            "-no-directfb",
+            "-no-eglfs",
+            "-no-glib",
+            "-no-kms",
+            "-no-linuxfb",
+            "-no-openssl",
+            "-qt-freetype",
+            "-qt-harfbuzz",
+            "-qt-xkbcommon"
+        ],
+        "win32": [
+            "-D", "QT_NO_TABLETEVENT"
+        ]
+    }
+}
