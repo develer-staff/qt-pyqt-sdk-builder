@@ -69,11 +69,7 @@ def main():
     # plan :: (component_name, build_function, abs_source_directory_path)
     plan = []
 
-    if sys.platform == 'darwin' or sys.platform == 'win32':
-        # We need to build ICU from sources only on OS X and Windows. On Ubuntu we can usually
-        # rely on ICU being installed system wide.
-        add_to_plan(plan, 'icu', build_icu, args.with_icu_sources)
-
+    add_to_plan(plan, 'icu', build_icu, args.with_icu_sources)
     add_to_plan(plan, 'qt', build_qt, args.with_qt_sources)
     add_to_plan(plan, 'sip', build_sip, args.with_sip_sources)
     add_to_plan(plan, 'pyqt', build_pyqt, args.with_pyqt_sources)
@@ -198,6 +194,11 @@ def build_icu(layout, debug, profile):
     if sys.platform == 'darwin':
         sdk.sh('chmod', '+x', 'configure', 'runConfigureICU')
         sdk.sh('bash', 'runConfigureICU', 'MacOSX', '--prefix=%s' % layout['root'], '--disable-debug', '--enable-release')
+        sdk.sh('make')
+        sdk.sh('make', 'install')
+    elif sys.platform == 'linux2':
+        sdk.sh('chmod', '+x', 'configure', 'runConfigureICU')
+        sdk.sh('bash', 'runConfigureICU', 'Linux', '--prefix=%s' % layout['root'], '--disable-debug', '--enable-release')
         sdk.sh('make')
         sdk.sh('make', 'install')
     elif sys.platform == 'win32':
