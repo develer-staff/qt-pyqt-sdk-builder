@@ -24,9 +24,7 @@ rem SOFTWARE.
 rem
 @echo ON
 
-powershell -Command "(New-Object System.Net.WebClient).DownloadFile(\"http://go.just-install.it\", \"${env:WinDir}\\\\just-install.exe\")" || exit /b 1
+msiexec.exe /i http://go.just-install.it || exit /b 1
 
 just-install update || exit /b 1
 just-install cygwin perl python27 ruby vc2008express || exit /b 1
-
-%TEMP%\DF0B8299.exe -q -P binutils -P make || exit /b 1
