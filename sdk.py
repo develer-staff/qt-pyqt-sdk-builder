@@ -44,10 +44,13 @@ def chdir(path):
 
     try:
         os.chdir(path)
+
         print("cd", os.path.abspath(path))
+
         yield
     finally:
         os.chdir(cwd)
+
         print("cd", cwd)
 
 
@@ -115,11 +118,13 @@ def sh(*args):
 
     return subprocess.check_call(args, stderr=sys.stderr, stdout=sys.stdout)
 
+
 def expand(source, dest=None):
     if source.endswith(".zip"):
         zipfile.ZipFile(source).extractall(dest)
     else:
         tarfile.open(source).extractall(dest)
+
 
 def die(*args):
     print('')
