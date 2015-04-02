@@ -116,7 +116,7 @@ def sh(*args):
     return subprocess.check_call(args, stderr=sys.stderr, stdout=sys.stdout)
 
 def expand(source, dest=None):
-    if source.endswith("zip"):
+    if source.endswith(".zip"):
         zipfile.ZipFile(source).extractall(dest)
     else:
         tarfile.open(source).extractall(dest)
