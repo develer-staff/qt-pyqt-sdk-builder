@@ -23,20 +23,27 @@
 # SOFTWARE.
 #
 
-apt-get build-dep qt4-x11
-apt-get install "libx11.*" "libxcb.*"
+apt-get build-dep -y qt4-x11
+apt-get install -y "libx11.*" "libxcb.*"
 apt-get install -y bison \
+    build-essential \
+    flex \
     gperf \
     libasound2-dev \
+    libbz2-dev \
     libcap-dev \
     libcups2-dev \
     libdbus-1-dev \
+    libdrm-dev \
     libfontconfig1-dev \
+    libgcrypt11-dev \
     libgl1-mesa-dev \
     libicu-dev \
     libnss3-dev \
+    libnss3-dev \
     libpci-dev \
     libpulse-dev \
+    libssl-dev \
     libudev-dev \
     libxcomposite-dev \
     libxcursor-dev \
@@ -44,6 +51,7 @@ apt-get install -y bison \
     libxi-dev \
     libxrandr-dev \
     libxtst-dev \
+    python \
     python-dev \
     re2c \
     ruby
