@@ -33,6 +33,8 @@ import os
 import os.path
 import subprocess
 import sys
+import tarfile
+import zipfile
 
 
 @contextlib.contextmanager
@@ -42,9 +44,14 @@ def chdir(path):
 
     try:
         os.chdir(path)
+
+        print("cd", os.path.abspath(path))
+
         yield
     finally:
         os.chdir(cwd)
+
+        print("cd", cwd)
 
 
 def get_layout(install_root):
@@ -110,6 +117,13 @@ def sh(*args):
     print('+', ' '.join(args))
 
     return subprocess.check_call(args, stderr=sys.stderr, stdout=sys.stdout)
+
+
+def expand(source, dest=None):
+    if source.endswith(".zip"):
+        zipfile.ZipFile(source).extractall(dest)
+    else:
+        tarfile.open(source).extractall(dest)
 
 
 def die(*args):
