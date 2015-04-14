@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python2.7
 # -*- coding: utf-8 -*-
 #
 # The MIT License (MIT)
@@ -55,10 +55,6 @@ SUPPORT_DIR = os.path.join(HERE, 'support')
 def main():
     args = parse_command_line()
 
-    # Load build profile
-    with open(args.profile, 'r') as profile_json:
-        profile = json.load(profile_json)
-
     # Autodiscover source directories, if possible.
     args.with_icu_sources = args.with_icu_sources or find_source_dir('icu*')
     args.with_qt_sources = args.with_qt_sources or find_source_dir('qt-everywhere-*')
@@ -77,6 +73,20 @@ def main():
     # If user specified some packages on the command line, build only those
     if args.packages:
         plan = [entry for entry in plan if entry[0] in args.packages]
+
+    # Require users to specify a build profile on the command line but only if we are actually going
+    # to rebuild Qt.
+    if [entry for entry in plan if entry[0] == 'qt']:
+        if not args.profile:
+            sdk.die('I need a profile in to rebuild Qt!')
+
+        if not os.path.isfile(args.profile):
+            sdk.die('No such file: %s' % args.profile)
+
+        with open(args.profile, 'r') as profile_json:
+            profile = json.load(profile_json)
+    else:
+        profile = {}
 
     # Determine install root
     if args.install_root:
@@ -107,7 +117,7 @@ def parse_command_line():
     args_parser.add_argument('-d', '--debug', action='store_true')
     args_parser.add_argument('-r', '--install-root', type=str)
     args_parser.add_argument('-m', '--make-package', action='store_true')
-    args_parser.add_argument('-p', '--profile', type=str, required=True)
+    args_parser.add_argument('-p', '--profile', type=str)
     args_parser.add_argument('-c', '--with-icu-sources', type=str)
     args_parser.add_argument('-t', '--with-pyqt-sources', type=str)
     args_parser.add_argument('-q', '--with-qt-sources', type=str)
