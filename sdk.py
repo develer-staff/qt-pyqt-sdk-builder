@@ -45,13 +45,13 @@ def chdir(path):
     try:
         os.chdir(path)
 
-        print("cd", os.path.abspath(path))
+        print("+ cd", os.path.abspath(path))
 
         yield
     finally:
         os.chdir(cwd)
 
-        print("cd", cwd)
+        print("+ cd", cwd)
 
 
 def get_layout(install_root):
