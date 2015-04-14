@@ -38,9 +38,12 @@ We usually build and test against the latest version of Qt 4, Qt 5, SIP and PyQt
 
 ## Installing Dependencies
 
-To setup your machine, run the appropriate setup script from the `script` directory.
+To setup your machine, run the appropriate setup script from the `script` directory. It will try to
+install all dependencies needed to rebuild Qt on your platform.
 
 ### OS X
+
+Make sure your user can install dependencies through [Homebrew](http://brew.sh), then:
 
     ./script/setup-osx.sh
 
@@ -52,12 +55,37 @@ To setup your machine, run the appropriate setup script from the `script` direct
 
 ### Windows
 
-    runas /user:Administrator ./script/setup-windows.cmd
+Launch `./script/setup-windows.cmd` as Administrator.
 
 
-## Usage
+## Overview
 
-Work in progress.
+This toolkit is composed of several moving parts:
+
+* `build.py`: This script will re-compile ICU, Qt, SIP and PyQt to generate a redistributable SDK.
+  By default this scripts creates a directory but a command line switch enables the creation of a
+  gzipped tarball.
+* `configure.py`: This script is distributed alongside the SDK. Users of the SDK will launch this
+  script to relocate the SDK and setup all the necessary environment variables to use it.
+* `sdk.py`: This file contains code in common between `build.py` and `configure.py`. It is therefore
+  needed during the build process and is included alongside `configure.py` in the resulting SDK.
+
+
+## Basic Usage
+
+*This section presumes you have already launched `build.py --help` at least once.*
+
+In order to build a complete SDK you have to tell `build.py`:
+
+1. Where all the needed source code (ICU, Qt, SIP, PyQt) is located on disk. To accomplish this you
+   can either specify the paths on the command line (see `build.py --help`) or create a `sources`
+   directory and unpack the source tarballs there.
+2. How to build Qt: what we call a *profile*. We have a couple of pre-made profiles in the
+   `profiles` directory.
+
+Then grab a cup of coffee and wait until `build.py` is done. If you are lucky, you will find
+everything in the `_out` directory (you can control the output directory with a command line switch,
+see `build.py --help` for more information).
 
 
 ## Limitations
