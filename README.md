@@ -21,10 +21,10 @@ files so that you don't have to recompile the whole world when debugging a PyQt 
 
 We usually build and test against the latest version of Qt 4, Qt 5, SIP and PyQt.
 
-| Qt, SIP, PyQt versions            | OS X 10.9 | Ubuntu 12.04 | Windows 7 |
-|-----------------------------------|-----------|--------------|-----------|
-| Qt 4.8.6, SIP 4.16.2, PyQt 4.11.1 | 64-bit    | 64-bit       | 32-bit    |
-| Qt 5.3.1, SIP 4.16.2, PyQt 5.3.1  | 64-bit    | 64-bit       | 32-bit    |
+| Qt, SIP, PyQt versions            | OS X 10.10 | Ubuntu 12.04 | Windows 7 |
+|-----------------------------------|------------|--------------|-----------|
+| Qt 4.8.6, SIP 4.16.7, PyQt 4.11.1 | 64-bit     | 64-bit       | 32-bit    |
+| Qt 5.4.1, SIP 4.16.7, PyQt 5.4.1  | 64-bit     | 64-bit       | 32-bit    |
 
 
 ### Compilers
