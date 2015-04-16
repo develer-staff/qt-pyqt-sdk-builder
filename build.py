@@ -76,7 +76,7 @@ def main():
 
     # Require users to specify a build profile on the command line but only if we are actually going
     # to rebuild Qt.
-    if [entry for entry in plan if entry[0] == 'qt']:
+    if not args.shell and [entry for entry in plan if entry[0] == 'qt']:
         if not args.profile:
             sdk.die('I need a profile in to rebuild Qt!')
 
@@ -103,8 +103,14 @@ def main():
     # Get this installation's layout
     layout = sdk.get_layout(install_root)
 
-    # Build
     prep(layout)
+
+    # Starting a shell stops the build here.
+    if args.shell:
+        sdk.start_subshell()
+
+        return
+
     build(plan, layout, args.debug, profile)
 
     if args.make_package:
@@ -118,6 +124,7 @@ def parse_command_line():
     args_parser.add_argument('-r', '--install-root', type=str)
     args_parser.add_argument('-m', '--make-package', action='store_true')
     args_parser.add_argument('-p', '--profile', type=str)
+    args_parser.add_argument('-k', '--shell', action='store_true')
     args_parser.add_argument('-c', '--with-icu-sources', type=str)
     args_parser.add_argument('-t', '--with-pyqt-sources', type=str)
     args_parser.add_argument('-q', '--with-qt-sources', type=str)
