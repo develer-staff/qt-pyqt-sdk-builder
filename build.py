@@ -92,16 +92,10 @@ def main():
     if args.install_root:
         install_root = args.install_root
     else:
-        qt_version = extract_version(args.with_qt_sources)
-        sip_version = extract_version(args.with_sip_sources)
-        pyqt_version = extract_version(args.with_pyqt_sources)
-        plat = sys.platform
-        arch = platform.architecture()[0]
-        build_type = 'debug' if args.debug else 'release'
-        install_root = os.path.join(HERE, '_out', 'qt-%s-sip-%s-pyqt-%s-%s-%s-%s' % (qt_version, sip_version, pyqt_version, plat, arch, build_type))
+        install_root = sdk.platform_root(os.path.join(HERE, '_out'))
 
     # Get this installation's layout
-    layout = sdk.get_layout(install_root)
+    layout = sdk.get_layout(sdk.platform_root(install_root))
 
     prep(layout)
 
@@ -153,13 +147,6 @@ def add_to_plan(plan, component_name, build_f, source_directory):
         sys.exit(1)
 
     plan.append((component_name, build_f, source_directory))
-
-
-def extract_version(path):
-    assert os.path.isdir(path)
-    found = re.findall(r'\d+\.\d+\.\d+', path)
-    assert len(found) == 1
-    return found[0]
 
 
 def prep(layout):
