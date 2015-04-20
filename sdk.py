@@ -31,6 +31,7 @@ from __future__ import print_function
 import contextlib
 import os
 import os.path
+import platform
 import subprocess
 import sys
 import tarfile
@@ -52,6 +53,20 @@ def chdir(path):
         os.chdir(cwd)
 
         print("+ cd", cwd)
+
+
+def platform_root(install_root, build_type='dynamic'):
+    """
+    Given the root directory of an SDK installation, returns the platform specific installation
+    root.
+
+    """
+    if build_type != 'static' and build_type != 'dynamic':
+        raise ValueError('build_type must be either "static" or "dynamic"')
+
+    platform_name = str(platform.system() + "-" + platform.architecture()[0]).lower()
+
+    return os.path.join(install_root, build_type, platform_name)
 
 
 def get_layout(install_root):

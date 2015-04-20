@@ -66,13 +66,28 @@ def parse_args():
 
 
 def setup(install_root, relocate=True):
-    layout = sdk.get_layout(install_root)
+    # FIXME: preserve API with existing clients but should be removed to provide a cleaner one.
+    if install_root == 'static' or install_root == 'dynamic':
+        print('WARNING: Legacy code-path, please update your script.')
+
+        build_type = install_root
+        layout = sdk.get_layout(sdk.platform_root(HERE, build_type))
+
+        if os.path.isdir(os.path.join(HERE, '.svn')):
+            svn_update_current_platform(layout['root'])
+    else:
+        layout = sdk.get_layout(sdk.platform_root(install_root))
 
     if relocate:
         relocate_qt(layout)
         relocate_sip(layout)
 
     setup_environment(layout)
+
+
+def svn_update_current_platform(install_root):
+    with sdk.chdir(HERE):
+        sdk.sh('svn', 'up', install_root)
 
 
 def relocate_qt(layout):
