@@ -27,6 +27,8 @@
 from __future__ import print_function
 
 import argparse
+import distutils
+import distutils.dir_util
 import fnmatch
 import glob
 import json
@@ -99,21 +101,29 @@ def main():
 
     prep(layout)
 
-    # Starting a shell stops the build here.
-    if args.shell:
-        sdk.start_subshell()
-
+    # --only-merge stops the build here.
+    if args.only_merge:
+        merge(layout)
         return
 
+    # --shell stops the build here.
+    if args.shell:
+        sdk.start_subshell()
+        return
+
+    # Build
     build(plan, layout, args.debug, profile)
+    merge(layout)
+    install_scripts(install_root)
 
 
 def parse_command_line():
     args_parser = argparse.ArgumentParser()
     args_parser.add_argument('-d', '--debug', action='store_true')
-    args_parser.add_argument('-r', '--install-root', type=str)
-    args_parser.add_argument('-p', '--profile', type=str)
     args_parser.add_argument('-k', '--shell', action='store_true')
+    args_parser.add_argument('-m', '--only-merge', action='store_true')
+    args_parser.add_argument('-p', '--profile', type=str)
+    args_parser.add_argument('-r', '--install-root', type=str)
     args_parser.add_argument('-c', '--with-icu-sources', type=str)
     args_parser.add_argument('-t', '--with-pyqt-sources', type=str)
     args_parser.add_argument('-q', '--with-qt-sources', type=str)
@@ -165,13 +175,22 @@ def build(recipes, layout, debug, profile):
             build_f(layout, debug, profile)
 
 
+def merge(layout):
+    merge_dir = os.path.join(HERE, 'merge')
+
+    if os.path.isdir(merge_dir):
+        sdk.print_box('Merging %s' % merge_dir, 'into', layout['root'])
+
+        distutils.dir_util.copy_tree(merge_dir, layout['root'])
+    else:
+        print('No files to merge.')
+
+
 def install_scripts(install_root):
+    sdk.print_box('Installing configure.py and sdk.py to:', install_root)
+
     shutil.copyfile(os.path.join(HERE, 'configure.py'), os.path.join(install_root, 'configure.py'))
     shutil.copyfile(os.path.join(HERE, 'sdk.py'), os.path.join(install_root, 'sdk.py'))
-
-
-
-
 
 #
 # Build recipes
