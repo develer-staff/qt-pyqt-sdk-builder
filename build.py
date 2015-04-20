@@ -107,16 +107,11 @@ def main():
 
     build(plan, layout, args.debug, profile)
 
-    if args.make_package:
-        install_scripts(install_root)
-        package(install_root, '%s.tar.gz' % (os.path.basename(install_root)))
-
 
 def parse_command_line():
     args_parser = argparse.ArgumentParser()
     args_parser.add_argument('-d', '--debug', action='store_true')
     args_parser.add_argument('-r', '--install-root', type=str)
-    args_parser.add_argument('-m', '--make-package', action='store_true')
     args_parser.add_argument('-p', '--profile', type=str)
     args_parser.add_argument('-k', '--shell', action='store_true')
     args_parser.add_argument('-c', '--with-icu-sources', type=str)
@@ -175,16 +170,8 @@ def install_scripts(install_root):
     shutil.copyfile(os.path.join(HERE, 'sdk.py'), os.path.join(install_root, 'sdk.py'))
 
 
-def package(install_root, archive_name):
-    parent, root_dir = os.path.split(install_root)
 
-    try:
-        tar_file = tarfile.open(archive_name, 'w:gz')
 
-        with sdk.chdir(parent):
-            tar_file.add(root_dir)
-    finally:
-        tar_file.close()
 
 #
 # Build recipes
