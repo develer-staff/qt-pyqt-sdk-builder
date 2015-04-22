@@ -50,6 +50,13 @@ QT_LICENSE_FILE = os.path.join(HERE, 'qt-license.txt')
 SUPPORT_DIR = os.path.join(HERE, 'support')
 
 
+def check_bash():
+    try:
+        sdk.sh("bash", "--version")
+    except:
+        sdk.die("ERROR: unable to run 'bash', check your PATH")
+
+
 def main():
     args = parse_command_line()
 
@@ -116,6 +123,10 @@ def parse_command_line():
 
     def has_package(pkg):
         return (pkg in args.packages or "all" in args.packages)
+
+    if has_package("icu"):
+        if sys.platform == 'win32':
+            check_bash()
 
     # to rebuild Qt.
     if has_package("qt"):
