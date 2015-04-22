@@ -60,15 +60,12 @@ def check_bash():
 def main():
     args = parse_command_line()
 
-    # Autodiscover source directories, if possible.
-    args.with_icu_sources = args.with_icu_sources or find_source_dir('icu*')
-    args.with_qt_sources = args.with_qt_sources or find_source_dir('qt-everywhere-*')
-    args.with_sip_sources = args.with_sip_sources or find_source_dir('sip-*')
-    args.with_pyqt_sources = args.with_pyqt_sources or find_source_dir('PyQt-*')
-
     # Prepare the build plan
     # plan :: (component_name, build_function, abs_source_directory_path)
     plan = []
+
+    def add_to_plan(plan, component_name, build_f, source_directory):
+        plan.append((component_name, build_f, source_directory))
 
     add_to_plan(plan, 'icu', build_icu, args.with_icu_sources)
     add_to_plan(plan, 'qt', build_qt, args.with_qt_sources)
@@ -108,6 +105,21 @@ def main():
 
 def parse_command_line():
     args_parser = argparse.ArgumentParser()
+
+    def check_source_dir(glob_pattern):
+        sdk.print_box("Sources discovery for %r..." % glob_pattern)
+        sources_pattern = os.path.join(HERE, 'sources', glob_pattern)
+        sources_pattern_platform = os.path.join(sdk.platform_root('sources'), glob_pattern)
+        globs = glob.glob(sources_pattern) + glob.glob(sources_pattern_platform)
+        candidates = [d for d in globs if os.path.isdir(d)]
+
+        if len(candidates) == 1:
+            return candidates[0]
+        elif len(candidates) > 1:
+            argparse.ArgumentTypeError("Too many candidates for %s: %s" % (glob_pattern, ", ".join(candidates)))
+        else:
+            argparse.ArgumentTypeError("%r not found, provide an existing folder" % candidates[0])
+
     args_parser.add_argument('-d', '--debug', action='store_true')
     args_parser.add_argument('-k', '--shell', action='store_true', help="starts a shell just before starting the build")
     args_parser.add_argument('-m', '--only-merge', action='store_true', help="Merge user provided files from ./merge")
@@ -116,16 +128,25 @@ def parse_command_line():
     args_parser.add_argument('-p', '--profile', type=sdk.maybe(sdk.ajson, {}), help="json config file for Qt build")
     args_parser.add_argument('-r', '--install-root', help="default: %(default)s", type=sdk.mkdir,
                              default=os.path.join(HERE, '_out'))
-    args_parser.add_argument('-c', '--with-icu-sources', type=str)
-    args_parser.add_argument('-t', '--with-pyqt-sources', type=str)
-    args_parser.add_argument('-q', '--with-qt-sources', type=str)
-    args_parser.add_argument('-s', '--with-sip-sources', type=str)
+    args_parser.add_argument('-c', '--with-icu-sources',  type=sdk.adir)
+    args_parser.add_argument('-t', '--with-pyqt-sources', type=sdk.adir)
+    args_parser.add_argument('-q', '--with-qt-sources',   type=sdk.adir)
+    args_parser.add_argument('-s', '--with-sip-sources',  type=sdk.adir)
     args_parser.add_argument('packages', metavar='packages', nargs='*')
 
     args = args_parser.parse_args()
 
     def has_package(pkg):
         return (pkg in args.packages or "all" in args.packages)
+
+    if args.with_icu_sources is None:
+        args.with_icu_sources = check_source_dir('icu*')
+    if args.with_pyqt_sources is None:
+        args.with_pyqt_sources = check_source_dir('PyQt-*')
+    if args.with_qt_sources is None:
+        args.with_qt_sources = check_source_dir('qt-everywhere-*')
+    if args.with_sip_sources is None:
+        args.with_sip_sources = check_source_dir('sip-*')
 
     if has_package("icu"):
         if sys.platform == 'win32':
@@ -137,30 +158,6 @@ def parse_command_line():
             sdk.die('I need a profile in to rebuild Qt!')
 
     return args
-
-
-def find_source_dir(glob_pattern):
-    sources_pattern = os.path.join(HERE, 'sources', glob_pattern)
-    sources_pattern_platform = os.path.join(HERE, sdk.platform_root('sources'), glob_pattern)
-    globs = glob.glob(sources_pattern) + glob.glob(sources_pattern_platform)
-    candidates = [d for d in globs if os.path.isdir(d)]
-
-    if candidates:
-        return candidates[0]
-    else:
-        return None
-
-
-def add_to_plan(plan, component_name, build_f, source_directory):
-    if not source_directory:
-        print('%s: need a source directory.' % component_name)
-        sys.exit(1)
-
-    if not os.path.isdir(source_directory):
-        print('%s: No such directory: %s' % (component_name, source_directory))
-        sys.exit(1)
-
-    plan.append((component_name, build_f, source_directory))
 
 
 def prep(layout):
