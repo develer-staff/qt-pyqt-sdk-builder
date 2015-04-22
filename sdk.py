@@ -33,7 +33,9 @@
 
 from __future__ import print_function
 
+import argparse
 import contextlib
+import json
 import os
 import os.path
 import platform
@@ -41,6 +43,37 @@ import subprocess
 import sys
 import tarfile
 import zipfile
+
+
+# Utility functions to be used as type=afunc in argparse arguments
+
+def adir(apath):
+    if os.path.isdir(apath):
+        return apath
+    else:
+        raise argparse.ArgumentTypeError("%r not found, provide an existing dir" % apath)
+
+
+def afile(apath):
+    if os.path.exists(apath) and not os.path.isdir(apath):
+        return apath
+    else:
+        raise argparse.ArgumentTypeError("%r not found, provide an existing file" % apath)
+
+
+def ajson(apath):
+    return json.load(open(afile(apath)))
+
+
+def maybe(afunc, default=None, verbose=False):
+    def _maybe(value):
+        try:
+            return afunc(value)
+        except Exception as err:
+            if verbose:
+                print(err)
+            return default
+    return _maybe
 
 
 @contextlib.contextmanager
