@@ -79,15 +79,10 @@ def main():
     if args.packages:
         plan = [entry for entry in plan if entry[0] in args.packages]
 
-    # Determine install root
-    if args.install_root:
-        install_root = args.install_root
-    else:
-        install_root = sdk.platform_root(os.path.join(HERE, '_out'))
-
     # Get this installation's layout
-    layout = sdk.get_layout(sdk.platform_root(install_root))
+    layout = sdk.get_layout(sdk.platform_root(args.install_root))
 
+    # Setup build environment
     prep(layout)
 
     # --only-merge stops the build here.
@@ -103,7 +98,7 @@ def main():
     # Build
     build(plan, layout, args.debug, args.profile)
     merge(layout)
-    install_scripts(install_root)
+    install_scripts(args.install_root)
 
 
 def parse_command_line():
@@ -112,7 +107,8 @@ def parse_command_line():
     args_parser.add_argument('-k', '--shell', action='store_true', help="starts a shell just before starting the build")
     args_parser.add_argument('-m', '--only-merge', action='store_true', help="Merge user provided files from ./merge")
     args_parser.add_argument('-p', '--profile', type=sdk.maybe(sdk.ajson, {}), help="json config file for Qt build")
-    args_parser.add_argument('-r', '--install-root', type=str)
+    args_parser.add_argument('-r', '--install-root', help="default: %(default)s", type=sdk.mkdir,
+                             default=os.path.join(HERE, '_out'))
     args_parser.add_argument('-c', '--with-icu-sources', type=str)
     args_parser.add_argument('-t', '--with-pyqt-sources', type=str)
     args_parser.add_argument('-q', '--with-qt-sources', type=str)

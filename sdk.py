@@ -54,6 +54,16 @@ def adir(apath):
         raise argparse.ArgumentTypeError("%r not found, provide an existing dir" % apath)
 
 
+def mkdir(apath):
+    if os.path.exists(apath):
+        return apath
+    try:
+        os.makedirs(apath)
+        return apath
+    except:
+        raise argparse.ArgumentTypeError("Unable to create %r dir" % apath)
+
+
 def afile(apath):
     if os.path.exists(apath) and not os.path.isdir(apath):
         return apath
