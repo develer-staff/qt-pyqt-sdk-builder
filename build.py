@@ -71,7 +71,7 @@ def main():
     add_to_plan(plan, 'pyqt', build_pyqt, args.with_pyqt_sources)
 
     # If user specified some packages on the command line, build only those
-    if args.packages:
+    if args.packages != 'all':
         plan = [entry for entry in plan if entry[0] in args.packages]
 
     # Get this installation's layout
@@ -130,7 +130,8 @@ def parse_command_line():
     args_parser.add_argument('-t', '--with-pyqt-sources', type=sdk.adir)
     args_parser.add_argument('-q', '--with-qt-sources',   type=sdk.adir)
     args_parser.add_argument('-s', '--with-sip-sources',  type=sdk.adir)
-    args_parser.add_argument('packages', metavar='packages', nargs='*')
+    args_parser.add_argument('packages', metavar='PACKAGES', nargs='*', choices=['sip', 'qt', 'pyqt', 'icu', 'all'],
+                             default='all', help="Build only selected packages from {%(choices)s}, default: %(default)s")
 
     args = args_parser.parse_args()
 
