@@ -133,7 +133,10 @@ def parse_command_line():
 
 
 def find_source_dir(glob_pattern):
-    candidates = [d for d in glob.glob(os.path.join(HERE, 'sources', glob_pattern)) if os.path.isdir(d)]
+    sources_pattern = os.path.join(HERE, 'sources', glob_pattern)
+    sources_pattern_platform = os.path.join(HERE, sdk.platform_root('sources'), glob_pattern)
+    globs = glob.glob(sources_pattern) + glob.glob(sources_pattern_platform)
+    candidates = [d for d in globs if os.path.isdir(d)]
 
     if candidates:
         return candidates[0]
