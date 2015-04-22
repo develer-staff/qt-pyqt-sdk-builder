@@ -166,10 +166,10 @@ def print_box(*args):
     print('')
 
 
-def sh(*args):
+def sh(*args, **kwargs):
     print('+', ' '.join(args))
-
-    return subprocess.check_call(args, stderr=sys.stderr, stdout=sys.stdout)
+    env = os.environ.copy() if kwargs.get("copy_env", True) else None
+    return subprocess.check_call(args, stderr=sys.stderr, stdout=sys.stdout, env=env)
 
 
 def expand(source, dest=None):
