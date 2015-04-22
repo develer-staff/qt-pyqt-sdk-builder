@@ -224,6 +224,15 @@ def build_icu(layout, debug, profile):
 
 
 def build_qt(layout, debug, profile):
+
+    def qtmake(*args):
+        try:
+            sdk.sh('jom', '/VERSION')
+        except:
+            make(*args)
+        else:
+            sdk.sh('jom', '-j%s' % str(multiprocessing.cpu_count() + 1), *args)
+
     if os.path.isfile(QT_LICENSE_FILE):
         qt_license = '-commercial'
 
@@ -289,8 +298,8 @@ def build_qt(layout, debug, profile):
 
     # Build
     configure_qt(*qt_configure_args)
-    make()
-    make('install')
+    qtmake()
+    qtmake('install')
 
     # Delete all libtool's .la files
     for root, _, filenames in os.walk(layout['root']):
