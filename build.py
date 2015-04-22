@@ -120,8 +120,8 @@ def main():
 def parse_command_line():
     args_parser = argparse.ArgumentParser()
     args_parser.add_argument('-d', '--debug', action='store_true')
-    args_parser.add_argument('-k', '--shell', action='store_true')
-    args_parser.add_argument('-m', '--only-merge', action='store_true')
+    args_parser.add_argument('-k', '--shell', action='store_true', help="starts a shell just before starting the build")
+    args_parser.add_argument('-m', '--only-merge', action='store_true', help="Merge user provided files from ./merge")
     args_parser.add_argument('-p', '--profile', type=str)
     args_parser.add_argument('-r', '--install-root', type=str)
     args_parser.add_argument('-c', '--with-icu-sources', type=str)
