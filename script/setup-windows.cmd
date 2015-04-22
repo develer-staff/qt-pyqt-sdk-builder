@@ -27,4 +27,6 @@ rem
 msiexec.exe /i http://go.just-install.it || exit /b 1
 
 just-install update || exit /b 1
-just-install cygwin perl python27 ruby vc2008express || exit /b 1
+just-install jom putty cygwin perl python27 ruby vc2008express || exit /b 1
+
+rem TODO: add just-install shims to path
