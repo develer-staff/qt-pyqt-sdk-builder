@@ -99,7 +99,7 @@ def platform_root(install_root, build_type='dynamic'):
     root.
 
     """
-    if build_type != 'static' and build_type != 'dynamic':
+    if build_type not in ('static', 'dynamic'):
         raise ValueError('build_type must be either "static" or "dynamic"')
 
     platform_name = str(platform.system() + "-" + platform.architecture()[0]).lower()

@@ -72,7 +72,7 @@ def parse_args():
 
 def setup(install_root, relocate=True):
     # FIXME: preserve API with existing clients but should be removed to provide a cleaner one.
-    if install_root == 'static' or install_root == 'dynamic':
+    if install_root in ('static', 'dynamic'):
         print('WARNING: Legacy code-path, please update your script.')
 
         build_type = install_root
