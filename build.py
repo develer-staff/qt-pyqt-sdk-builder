@@ -95,6 +95,11 @@ def main():
         sdk.start_subshell()
         return
 
+    # --only-scripts stops the build here.
+    if args.only_scripts:
+        install_scripts(args.install_root)
+        return
+
     # Build
     build(plan, layout, args.debug, args.profile)
     merge(layout)
@@ -106,6 +111,8 @@ def parse_command_line():
     args_parser.add_argument('-d', '--debug', action='store_true')
     args_parser.add_argument('-k', '--shell', action='store_true', help="starts a shell just before starting the build")
     args_parser.add_argument('-m', '--only-merge', action='store_true', help="Merge user provided files from ./merge")
+    args_parser.add_argument('-n', '--only-scripts', action='store_true',
+                             help='Skip build step, update install scripts only')
     args_parser.add_argument('-p', '--profile', type=sdk.maybe(sdk.ajson, {}), help="json config file for Qt build")
     args_parser.add_argument('-r', '--install-root', help="default: %(default)s", type=sdk.mkdir,
                              default=os.path.join(HERE, '_out'))
