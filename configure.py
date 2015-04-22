@@ -24,6 +24,11 @@
 # SOFTWARE.
 #
 
+# #############################################################################
+# NOTE: if not in github.com/develersrl/qt-pyqt-sdk-builder sources           #
+# this file is overwritten every build.py run and copied in the generated SDK #
+# #############################################################################
+
 from __future__ import print_function
 
 import argparse
