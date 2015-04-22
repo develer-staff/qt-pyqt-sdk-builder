@@ -31,15 +31,11 @@ import distutils
 import distutils.dir_util
 import fnmatch
 import glob
-import json
 import multiprocessing
 import os
 import os.path
-import platform
-import re
 import shutil
 import sys
-import tarfile
 
 import sdk
 
@@ -76,20 +72,6 @@ def main():
     if args.packages:
         plan = [entry for entry in plan if entry[0] in args.packages]
 
-    # Require users to specify a build profile on the command line but only if we are actually going
-    # to rebuild Qt.
-    if not args.shell and [entry for entry in plan if entry[0] == 'qt']:
-        if not args.profile:
-            sdk.die('I need a profile in to rebuild Qt!')
-
-        if not os.path.isfile(args.profile):
-            sdk.die('No such file: %s' % args.profile)
-
-        with open(args.profile, 'r') as profile_json:
-            profile = json.load(profile_json)
-    else:
-        profile = {}
-
     # Determine install root
     if args.install_root:
         install_root = args.install_root
@@ -112,7 +94,7 @@ def main():
         return
 
     # Build
-    build(plan, layout, args.debug, profile)
+    build(plan, layout, args.debug, args.profile)
     merge(layout)
     install_scripts(install_root)
 
@@ -122,7 +104,7 @@ def parse_command_line():
     args_parser.add_argument('-d', '--debug', action='store_true')
     args_parser.add_argument('-k', '--shell', action='store_true', help="starts a shell just before starting the build")
     args_parser.add_argument('-m', '--only-merge', action='store_true', help="Merge user provided files from ./merge")
-    args_parser.add_argument('-p', '--profile', type=str)
+    args_parser.add_argument('-p', '--profile', type=sdk.maybe(sdk.ajson, {}), help="json config file for Qt build")
     args_parser.add_argument('-r', '--install-root', type=str)
     args_parser.add_argument('-c', '--with-icu-sources', type=str)
     args_parser.add_argument('-t', '--with-pyqt-sources', type=str)
@@ -130,7 +112,17 @@ def parse_command_line():
     args_parser.add_argument('-s', '--with-sip-sources', type=str)
     args_parser.add_argument('packages', metavar='packages', nargs='*')
 
-    return args_parser.parse_args()
+    args = args_parser.parse_args()
+
+    def has_package(pkg):
+        return (pkg in args.packages or "all" in args.packages)
+
+    # to rebuild Qt.
+    if has_package("qt"):
+        if not args.profile:
+            sdk.die('I need a profile in to rebuild Qt!')
+
+    return args
 
 
 def find_source_dir(glob_pattern):
