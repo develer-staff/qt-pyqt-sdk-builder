@@ -27,8 +27,6 @@
 from __future__ import print_function
 
 import argparse
-import distutils
-import distutils.dir_util
 import fnmatch
 import glob
 import multiprocessing
@@ -187,7 +185,7 @@ def merge(layout):
     if os.path.isdir(merge_dir):
         sdk.print_box('Merging %s' % merge_dir, 'into', layout['root'])
 
-        distutils.dir_util.copy_tree(merge_dir, layout['root'])
+        sdk.copy_tree(merge_dir, layout['root'])
     else:
         print('No files to merge.')
 

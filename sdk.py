@@ -43,6 +43,7 @@ import subprocess
 import sys
 import tarfile
 import zipfile
+import distutils.dir_util
 
 
 # Utility functions to be used as type=afunc in argparse arguments
@@ -175,6 +176,8 @@ def print_box(*args):
     print('=' * 78)
     print('')
 
+
+copy_tree = distutils.dir_util.copy_tree
 
 def sh(*args, **kwargs):
     print('+', ' '.join(args))
