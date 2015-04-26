@@ -114,16 +114,20 @@ def parse_command_line():
         if len(candidates) == 1:
             return candidates[0]
         elif len(candidates) > 1:
-            argparse.ArgumentTypeError("Too many candidates for %s: %s" % (glob_pattern, ", ".join(candidates)))
+            argparse.ArgumentTypeError(
+                "Too many candidates for %s: %s" % (glob_pattern, ", ".join(candidates)))
         else:
             argparse.ArgumentTypeError("%r not found, provide an existing folder" % candidates[0])
 
     args_parser.add_argument('-d', '--debug', action='store_true')
-    args_parser.add_argument('-k', '--shell', action='store_true', help="starts a shell just before starting the build")
-    args_parser.add_argument('-m', '--only-merge', action='store_true', help="Merge user provided files from ./merge")
+    args_parser.add_argument(
+        '-k', '--shell', action='store_true', help="starts a shell just before starting the build")
+    args_parser.add_argument(
+        '-m', '--only-merge', action='store_true', help="Merge user provided files from ./merge")
     args_parser.add_argument('-n', '--only-scripts', action='store_true',
                              help='Skip build step, update install scripts only')
-    args_parser.add_argument('-p', '--profile', type=sdk.maybe(sdk.ajson, {}), help="json config file for Qt build")
+    args_parser.add_argument(
+        '-p', '--profile', type=sdk.maybe(sdk.ajson, {}), help="json config file for Qt build")
     args_parser.add_argument('-r', '--install-root', help="default: %(default)s", type=sdk.mkdir,
                              default=os.path.join(HERE, '_out'))
     args_parser.add_argument('-c', '--with-icu-sources',  type=sdk.adir)
@@ -194,7 +198,8 @@ def merge(layout):
 def install_scripts(install_root):
     sdk.print_box('Installing configure.py and sdk.py to:', install_root)
 
-    shutil.copyfile(os.path.join(HERE, 'configure.py'), os.path.join(install_root, 'configure.py'))
+    shutil.copyfile(
+        os.path.join(HERE, 'configure.py'), os.path.join(install_root, 'configure.py'))
     shutil.copyfile(os.path.join(HERE, 'sdk.py'), os.path.join(install_root, 'sdk.py'))
 
 #
@@ -202,18 +207,21 @@ def install_scripts(install_root):
 # Function prototype: def f(layout, debug, profile) :: dict -> bool -> dict
 #
 
+
 def build_icu(layout, debug, profile):
     # NOTE: We always build ICU in release mode since we don't usually need to debug it.
     os.chdir('source')
 
     if sys.platform == 'darwin':
         sdk.sh('chmod', '+x', 'configure', 'runConfigureICU')
-        sdk.sh('bash', 'runConfigureICU', 'MacOSX', '--prefix=%s' % layout['root'], '--disable-debug', '--enable-release')
+        sdk.sh('bash', 'runConfigureICU', 'MacOSX', '--prefix=%s' %
+               layout['root'], '--disable-debug', '--enable-release')
         sdk.sh('make')
         sdk.sh('make', 'install')
     elif sys.platform == 'linux2':
         sdk.sh('chmod', '+x', 'configure', 'runConfigureICU')
-        sdk.sh('bash', 'runConfigureICU', 'Linux', '--prefix=%s' % layout['root'], '--disable-debug', '--enable-release')
+        sdk.sh('bash', 'runConfigureICU', 'Linux', '--prefix=%s' %
+               layout['root'], '--disable-debug', '--enable-release')
         sdk.sh('make')
         sdk.sh('make', 'install')
     elif sys.platform == 'win32':
@@ -221,7 +229,8 @@ def build_icu(layout, debug, profile):
         cy_install_root = layout['root'].replace('\\', '/')
         cy_install_root = cy_install_root.replace('C:/', '/cygdrive/c/')
 
-        sdk.sh('bash', 'runConfigureICU', 'Cygwin/MSVC', '--prefix=%s' % cy_install_root, '--disable-debug', '--enable-release')
+        sdk.sh('bash', 'runConfigureICU', 'Cygwin/MSVC', '--prefix=%s' %
+               cy_install_root, '--disable-debug', '--enable-release')
         sdk.sh('bash', '-c', 'make')  # We have to use GNU make here, so no make() wrapper...
         sdk.sh('bash', '-c', 'make install')
     else:
@@ -269,9 +278,11 @@ def build_qt(layout, debug, profile):
     # Enable proper release + debug .pdb files on Windows
     if debug:
         if sys.platform == 'win32':
-            mkspec_file_name = 'qt%s-msvc2008-release-with-debuginfo.conf' % profile['qt']['version']
+            mkspec_file_name = 'qt%s-msvc2008-release-with-debuginfo.conf' % profile[
+                'qt']['version']
 
-            shutil.copyfile(os.path.join(SUPPORT_DIR, mkspec_file_name), os.path.join('mkspecs', 'win32-msvc2008', 'qmake.conf'))
+            shutil.copyfile(os.path.join(SUPPORT_DIR, mkspec_file_name), os.path.join(
+                'mkspecs', 'win32-msvc2008', 'qmake.conf'))
             qt_configure_args.append('-release')
         else:
             qt_configure_args.append('-debug')
@@ -285,7 +296,8 @@ def build_qt(layout, debug, profile):
 
     if sys.platform == 'win32':
         # VC++ doesn't have stdint.h (required by WebKit)
-        shutil.copy(os.path.join(SUPPORT_DIR, 'stdint-msvc.h'), os.path.join(layout['include'], 'stdint.h'))
+        shutil.copy(os.path.join(SUPPORT_DIR, 'stdint-msvc.h'),
+                    os.path.join(layout['include'], 'stdint.h'))
 
         # Add gnuwin32 to the PATH (required by WebKit)
         qt_source_dir = os.path.abspath(os.getcwd())
@@ -356,6 +368,7 @@ def build_pyqt(layout, debug, profile):
 #
 # Utility methods
 #
+
 
 def is_qt5():
     return os.path.isdir('qtbase')

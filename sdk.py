@@ -35,6 +35,7 @@ from __future__ import print_function
 
 import argparse
 import contextlib
+import distutils.dir_util
 import json
 import os
 import os.path
@@ -43,7 +44,6 @@ import subprocess
 import sys
 import tarfile
 import zipfile
-import distutils.dir_util
 
 
 # Utility functions to be used as type=afunc in argparse arguments
@@ -178,6 +178,7 @@ def print_box(*args):
 
 
 copy_tree = distutils.dir_util.copy_tree
+
 
 def sh(*args, **kwargs):
     print('+', ' '.join(args))
