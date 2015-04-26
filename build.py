@@ -27,19 +27,13 @@
 from __future__ import print_function
 
 import argparse
-import distutils
-import distutils.dir_util
 import fnmatch
 import glob
-import json
 import multiprocessing
 import os
 import os.path
-import platform
-import re
 import shutil
 import sys
-import tarfile
 
 import sdk
 
@@ -54,18 +48,22 @@ QT_LICENSE_FILE = os.path.join(HERE, 'qt-license.txt')
 SUPPORT_DIR = os.path.join(HERE, 'support')
 
 
+def check_bash():
+    try:
+        sdk.sh("bash", "--version")
+    except:
+        sdk.die("ERROR: unable to run 'bash', check your PATH")
+
+
 def main():
     args = parse_command_line()
-
-    # Autodiscover source directories, if possible.
-    args.with_icu_sources = args.with_icu_sources or find_source_dir('icu*')
-    args.with_qt_sources = args.with_qt_sources or find_source_dir('qt-everywhere-*')
-    args.with_sip_sources = args.with_sip_sources or find_source_dir('sip-*')
-    args.with_pyqt_sources = args.with_pyqt_sources or find_source_dir('PyQt-*')
 
     # Prepare the build plan
     # plan :: (component_name, build_function, abs_source_directory_path)
     plan = []
+
+    def add_to_plan(plan, component_name, build_f, source_directory):
+        plan.append((component_name, build_f, source_directory))
 
     add_to_plan(plan, 'icu', build_icu, args.with_icu_sources)
     add_to_plan(plan, 'qt', build_qt, args.with_qt_sources)
@@ -73,32 +71,13 @@ def main():
     add_to_plan(plan, 'pyqt', build_pyqt, args.with_pyqt_sources)
 
     # If user specified some packages on the command line, build only those
-    if args.packages:
+    if args.packages != 'all':
         plan = [entry for entry in plan if entry[0] in args.packages]
 
-    # Require users to specify a build profile on the command line but only if we are actually going
-    # to rebuild Qt.
-    if not args.shell and [entry for entry in plan if entry[0] == 'qt']:
-        if not args.profile:
-            sdk.die('I need a profile in to rebuild Qt!')
-
-        if not os.path.isfile(args.profile):
-            sdk.die('No such file: %s' % args.profile)
-
-        with open(args.profile, 'r') as profile_json:
-            profile = json.load(profile_json)
-    else:
-        profile = {}
-
-    # Determine install root
-    if args.install_root:
-        install_root = args.install_root
-    else:
-        install_root = sdk.platform_root(os.path.join(HERE, '_out'))
-
     # Get this installation's layout
-    layout = sdk.get_layout(sdk.platform_root(install_root))
+    layout = sdk.get_layout(sdk.platform_root(args.install_root))
 
+    # Setup build environment
     prep(layout)
 
     # --only-merge stops the build here.
@@ -111,47 +90,73 @@ def main():
         sdk.start_subshell()
         return
 
+    # --only-scripts stops the build here.
+    if args.only_scripts:
+        install_scripts(args.install_root)
+        return
+
     # Build
-    build(plan, layout, args.debug, profile)
+    build(plan, layout, args.debug, args.profile)
     merge(layout)
-    install_scripts(install_root)
+    install_scripts(args.install_root)
 
 
 def parse_command_line():
     args_parser = argparse.ArgumentParser()
+
+    def check_source_dir(glob_pattern):
+        sdk.print_box("Sources discovery for %r..." % glob_pattern)
+        sources_pattern = os.path.join(HERE, 'sources', glob_pattern)
+        sources_pattern_platform = os.path.join(sdk.platform_root('sources'), glob_pattern)
+        globs = glob.glob(sources_pattern) + glob.glob(sources_pattern_platform)
+        candidates = [d for d in globs if os.path.isdir(d)]
+
+        if len(candidates) == 1:
+            return candidates[0]
+        elif len(candidates) > 1:
+            argparse.ArgumentTypeError("Too many candidates for %s: %s" % (glob_pattern, ", ".join(candidates)))
+        else:
+            argparse.ArgumentTypeError("%r not found, provide an existing folder" % candidates[0])
+
     args_parser.add_argument('-d', '--debug', action='store_true')
-    args_parser.add_argument('-k', '--shell', action='store_true')
-    args_parser.add_argument('-m', '--only-merge', action='store_true')
-    args_parser.add_argument('-p', '--profile', type=str)
-    args_parser.add_argument('-r', '--install-root', type=str)
-    args_parser.add_argument('-c', '--with-icu-sources', type=str)
-    args_parser.add_argument('-t', '--with-pyqt-sources', type=str)
-    args_parser.add_argument('-q', '--with-qt-sources', type=str)
-    args_parser.add_argument('-s', '--with-sip-sources', type=str)
-    args_parser.add_argument('packages', metavar='packages', nargs='*')
+    args_parser.add_argument('-k', '--shell', action='store_true', help="starts a shell just before starting the build")
+    args_parser.add_argument('-m', '--only-merge', action='store_true', help="Merge user provided files from ./merge")
+    args_parser.add_argument('-n', '--only-scripts', action='store_true',
+                             help='Skip build step, update install scripts only')
+    args_parser.add_argument('-p', '--profile', type=sdk.maybe(sdk.ajson, {}), help="json config file for Qt build")
+    args_parser.add_argument('-r', '--install-root', help="default: %(default)s", type=sdk.mkdir,
+                             default=os.path.join(HERE, '_out'))
+    args_parser.add_argument('-c', '--with-icu-sources',  type=sdk.adir)
+    args_parser.add_argument('-t', '--with-pyqt-sources', type=sdk.adir)
+    args_parser.add_argument('-q', '--with-qt-sources',   type=sdk.adir)
+    args_parser.add_argument('-s', '--with-sip-sources',  type=sdk.adir)
+    args_parser.add_argument('packages', metavar='PACKAGES', nargs='*', choices=['sip', 'qt', 'pyqt', 'icu', 'all'],
+                             default='all', help="Build only selected packages from {%(choices)s}, default: %(default)s")
 
-    return args_parser.parse_args()
+    args = args_parser.parse_args()
 
+    def has_package(pkg):
+        return (pkg in args.packages or "all" in args.packages)
 
-def find_source_dir(glob_pattern):
-    candidates = [d for d in glob.glob(os.path.join(HERE, 'sources', glob_pattern)) if os.path.isdir(d)]
+    if args.with_icu_sources is None:
+        args.with_icu_sources = check_source_dir('icu*')
+    if args.with_pyqt_sources is None:
+        args.with_pyqt_sources = check_source_dir('PyQt-*')
+    if args.with_qt_sources is None:
+        args.with_qt_sources = check_source_dir('qt-everywhere-*')
+    if args.with_sip_sources is None:
+        args.with_sip_sources = check_source_dir('sip-*')
 
-    if candidates:
-        return candidates[0]
-    else:
-        return None
+    if has_package("icu"):
+        if sys.platform == 'win32':
+            check_bash()
 
+    # to rebuild Qt.
+    if has_package("qt"):
+        if not args.profile:
+            sdk.die('I need a profile in to rebuild Qt!')
 
-def add_to_plan(plan, component_name, build_f, source_directory):
-    if not source_directory:
-        print('%s: need a source directory.' % component_name)
-        sys.exit(1)
-
-    if not os.path.isdir(source_directory):
-        print('%s: No such directory: %s' % (component_name, source_directory))
-        sys.exit(1)
-
-    plan.append((component_name, build_f, source_directory))
+    return args
 
 
 def prep(layout):
@@ -181,7 +186,7 @@ def merge(layout):
     if os.path.isdir(merge_dir):
         sdk.print_box('Merging %s' % merge_dir, 'into', layout['root'])
 
-        distutils.dir_util.copy_tree(merge_dir, layout['root'])
+        sdk.copy_tree(merge_dir, layout['root'])
     else:
         print('No files to merge.')
 
@@ -224,6 +229,15 @@ def build_icu(layout, debug, profile):
 
 
 def build_qt(layout, debug, profile):
+
+    def qtmake(*args):
+        try:
+            sdk.sh('jom', '/VERSION')
+        except:
+            make(*args)
+        else:
+            sdk.sh('jom', '-j%s' % str(multiprocessing.cpu_count() + 1), *args)
+
     if os.path.isfile(QT_LICENSE_FILE):
         qt_license = '-commercial'
 
@@ -289,8 +303,8 @@ def build_qt(layout, debug, profile):
 
     # Build
     configure_qt(*qt_configure_args)
-    make()
-    make('install')
+    qtmake()
+    qtmake('install')
 
     # Delete all libtool's .la files
     for root, _, filenames in os.walk(layout['root']):

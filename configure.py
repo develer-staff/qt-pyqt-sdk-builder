@@ -24,6 +24,11 @@
 # SOFTWARE.
 #
 
+# #############################################################################
+# NOTE: if not in github.com/develersrl/qt-pyqt-sdk-builder sources           #
+# this file is overwritten every build.py run and copied in the generated SDK #
+# #############################################################################
+
 from __future__ import print_function
 
 import argparse
@@ -57,17 +62,18 @@ def main():
 
 def parse_args():
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument('-q', '--relocate', action='store_false')
+    arg_parser.add_argument('-q', '--no-relocate', action='store_false', dest="relocate")
     arg_parser.add_argument('-r', '--install-root', type=str, default=HERE, help='SDK installation root')
     arg_parser.add_argument('-s', '--shell', action='store_false')
-    arg_parser.add_argument('command', nargs='*', metavar='command', help='command (with arguments) to run within the SDK environment')
+    arg_parser.add_argument('command', nargs='*', metavar='command',
+                             help='command (with arguments) to run within the SDK environment')
 
     return arg_parser.parse_args()
 
 
 def setup(install_root, relocate=True):
     # FIXME: preserve API with existing clients but should be removed to provide a cleaner one.
-    if install_root == 'static' or install_root == 'dynamic':
+    if install_root in ('static', 'dynamic'):
         print('WARNING: Legacy code-path, please update your script.')
 
         build_type = install_root

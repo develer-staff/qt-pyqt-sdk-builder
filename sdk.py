@@ -24,11 +24,18 @@
 # SOFTWARE.
 #
 
+# #############################################################################
+# NOTE: if not in github.com/develersrl/qt-pyqt-sdk-builder sources           #
+# this file is overwritten every build.py run and copied in the generated SDK #
+# #############################################################################
+
 """Support methods used in both build.py and configure.py"""
 
 from __future__ import print_function
 
+import argparse
 import contextlib
+import json
 import os
 import os.path
 import platform
@@ -36,6 +43,48 @@ import subprocess
 import sys
 import tarfile
 import zipfile
+import distutils.dir_util
+
+
+# Utility functions to be used as type=afunc in argparse arguments
+
+def adir(apath):
+    if os.path.isdir(apath):
+        return apath
+    else:
+        raise argparse.ArgumentTypeError("%r not found, provide an existing dir" % apath)
+
+
+def mkdir(apath):
+    if os.path.exists(apath):
+        return apath
+    try:
+        os.makedirs(apath)
+        return apath
+    except:
+        raise argparse.ArgumentTypeError("Unable to create %r dir" % apath)
+
+
+def afile(apath):
+    if os.path.exists(apath) and not os.path.isdir(apath):
+        return apath
+    else:
+        raise argparse.ArgumentTypeError("%r not found, provide an existing file" % apath)
+
+
+def ajson(apath):
+    return json.load(open(afile(apath)))
+
+
+def maybe(afunc, default=None, verbose=False):
+    def _maybe(value):
+        try:
+            return afunc(value)
+        except Exception as err:
+            if verbose:
+                print(err)
+            return default
+    return _maybe
 
 
 @contextlib.contextmanager
@@ -61,7 +110,7 @@ def platform_root(install_root, build_type='dynamic'):
     root.
 
     """
-    if build_type != 'static' and build_type != 'dynamic':
+    if build_type not in ('static', 'dynamic'):
         raise ValueError('build_type must be either "static" or "dynamic"')
 
     platform_name = str(platform.system() + "-" + platform.architecture()[0]).lower()
@@ -128,10 +177,12 @@ def print_box(*args):
     print('')
 
 
-def sh(*args):
-    print('+', ' '.join(args))
+copy_tree = distutils.dir_util.copy_tree
 
-    return subprocess.check_call(args, stderr=sys.stderr, stdout=sys.stdout)
+def sh(*args, **kwargs):
+    print('+', ' '.join(args))
+    env = os.environ.copy() if kwargs.get("copy_env", True) else None
+    return subprocess.check_call(args, stderr=sys.stderr, stdout=sys.stdout, env=env)
 
 
 def expand(source, dest=None):
