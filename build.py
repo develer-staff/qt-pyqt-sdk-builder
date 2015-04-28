@@ -116,7 +116,7 @@ def parse_command_line():
         elif len(candidates) > 1:
             argparse.ArgumentTypeError("Too many candidates for %s: %s" % (glob_pattern, ", ".join(candidates)))
         else:
-            argparse.ArgumentTypeError("%r not found, provide an existing folder" % candidates[0])
+            argparse.ArgumentTypeError("%r not found, provide an existing folder" % glob_pattern)
 
     args_parser.add_argument('-d', '--debug', action='store_true')
     args_parser.add_argument('-k', '--shell', action='store_true', help="starts a shell just before starting the build")
