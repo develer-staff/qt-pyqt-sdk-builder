@@ -117,7 +117,7 @@ def parse_command_line():
             argparse.ArgumentTypeError(
                 "Too many candidates for %s: %s" % (glob_pattern, ", ".join(candidates)))
         else:
-            argparse.ArgumentTypeError("%r not found, provide an existing folder" % candidates[0])
+            argparse.ArgumentTypeError("%r not found, provide an existing folder" % glob_pattern)
 
     args_parser.add_argument('-d', '--debug', action='store_true')
     args_parser.add_argument(
