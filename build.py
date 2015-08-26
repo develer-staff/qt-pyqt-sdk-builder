@@ -3,7 +3,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2014  Develer S.r.L.
+# Copyright (c) 2014-2015  Develer S.r.L.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -121,22 +121,23 @@ def parse_command_line():
             argparse.ArgumentTypeError("%r not found, provide an existing folder" % glob_pattern)
 
     args_parser.add_argument('-d', '--debug', action='store_true')
-    args_parser.add_argument(
-        '-k', '--shell', action='store_true', help="starts a shell just before starting the build")
-    args_parser.add_argument(
-        '-m', '--only-merge', action='store_true', help="Merge user provided files from ./merge")
+    args_parser.add_argument('-k', '--shell', action='store_true',
+                             help="starts a shell just before starting the build")
+    args_parser.add_argument('-m', '--only-merge', action='store_true',
+                             help="Merge user provided files from ./merge")
     args_parser.add_argument('-n', '--only-scripts', action='store_true',
                              help='Skip build step, update install scripts only')
-    args_parser.add_argument(
-        '-p', '--profile', type=sdk.maybe(sdk.ajson, {}), help="json config file for Qt build")
+    args_parser.add_argument('-p', '--profile', type=sdk.maybe(sdk.ajson, {}),
+                             help="json config file for Qt build")
     args_parser.add_argument('-r', '--install-root', help="default: %(default)s", type=sdk.mkdir,
                              default=os.path.join(HERE, '_out'))
     args_parser.add_argument('-c', '--with-icu-sources',  type=sdk.adir)
     args_parser.add_argument('-t', '--with-pyqt-sources', type=sdk.adir)
     args_parser.add_argument('-q', '--with-qt-sources',   type=sdk.adir)
     args_parser.add_argument('-s', '--with-sip-sources',  type=sdk.adir)
-    args_parser.add_argument('packages', metavar='PACKAGES', nargs='*', choices=['sip', 'qt', 'pyqt', 'icu', 'all'],
-                             default='all', help="Build only selected packages from {%(choices)s}, default: %(default)s")
+    args_parser.add_argument('packages', metavar='PACKAGES', nargs='*',
+                             choices=['sip', 'qt', 'pyqt', 'icu', 'all'], default='all',
+                             help="Build only selected packages from {%(choices)s}, default: %(default)s")
 
     args = args_parser.parse_args()
 
