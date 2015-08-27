@@ -238,6 +238,31 @@ def build_icu(layout, debug, profile):
         sdk.die('You have to rebuild ICU only on OS X or Windows')
 
 
+def install_qt_requirements():
+    def is_ubuntu():
+        if os.path.exists("/etc/lsb-release"):
+            with open("/etc/lsb-release") as f:
+                for line in f:
+                    if line.startswith("DISTRIB_ID"):
+                        return "Ubuntu" in line
+        return False
+    if is_ubuntu():
+        sdk.sh("sudo", "apt-get", "install",
+               "libfontconfig1-dev",
+               "libfreetype6-dev",
+               "libx11-dev",
+               "libxcursor-dev",
+               "libxext-dev",
+               "libxfixes-dev",
+               "libxft-dev",
+               "libxi-dev",
+               "libxrandr-dev",
+               "libxrender-dev",
+               "libgl1-mesa-dev",
+               "libglu1-mesa-dev",
+               "libcups2-dev")
+
+
 def build_qt(layout, debug, profile):
 
     def qtmake(*args):
@@ -316,6 +341,9 @@ def build_qt(layout, debug, profile):
         and os.path.isfile('/usr/bin/clang++')
     if has_clang and not is_qt5():
         qt_configure_args.extend(['-platform', 'unsupported/macx-clang'])
+
+    # Install build requirements (Ubuntu only)
+    install_qt_requirements()
 
     # Build
     configure_qt(*qt_configure_args)
