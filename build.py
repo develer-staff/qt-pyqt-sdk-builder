@@ -136,7 +136,7 @@ def parse_command_line():
     args_parser.add_argument('-q', '--with-qt-sources',   type=sdk.adir)
     args_parser.add_argument('-s', '--with-sip-sources',  type=sdk.adir)
     args_parser.add_argument('packages', metavar='PACKAGES', nargs='*',
-                             choices=['sip', 'qt', 'pyqt', 'icu', 'all'], default='all',
+                             choices=['all', 'icu', 'qt', 'sip', 'pyqt'], default='all',
                              help="Build only selected packages from {%(choices)s}, default: %(default)s")
 
     args = args_parser.parse_args()
