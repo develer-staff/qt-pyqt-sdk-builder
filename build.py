@@ -247,7 +247,7 @@ def install_qt_requirements():
                         return "Ubuntu" in line
         return False
     if is_ubuntu():
-        sdk.sh("sudo", "apt-get", "install",
+        sdk.sh("sudo", "apt-get", "install", "-y",
                "libfontconfig1-dev",
                "libfreetype6-dev",
                "libx11-dev",
@@ -260,7 +260,8 @@ def install_qt_requirements():
                "libxrender-dev",
                "libgl1-mesa-dev",
                "libglu1-mesa-dev",
-               "libcups2-dev")
+               "libcups2-dev",
+               "python-dev")
 
 
 def build_qt(layout, debug, profile):
