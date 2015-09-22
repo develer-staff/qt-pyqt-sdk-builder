@@ -33,7 +33,10 @@ We usually build and test against the latest version of Qt 4, Qt 5, SIP and PyQt
 |----------|-----|-------|---------------|-------|
 | Linux    | Yes | No    | -             | -     |
 | OS X     | No  | Yes   | -             | -     |
-| Windows  | -   | -     | Yes (2008)    | No    |
+| Windows  | -   | -     | Yes (2008)\*    | No    |
+
+\* Supported Versions are : Visual C++ and Visual C++ 2008 Express Editions. Visual Studio
+C++ for Python is currently incompatible.
 
 
 ## Installing Dependencies
