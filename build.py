@@ -267,12 +267,15 @@ def install_qt_requirements():
 def build_qt(layout, debug, profile):
 
     def qtmake(*args):
-        try:
-            sdk.sh('jom', '/VERSION')
-        except:
+        if sys.platform == 'win32':
             make(*args)
         else:
-            sdk.sh('jom', '-j%s' % str(multiprocessing.cpu_count() + 1), *args)
+            try:
+                sdk.sh('jom', '/VERSION')
+            except:
+                make(*args)
+            else:
+                sdk.sh('jom', '-j%s' % str(multiprocessing.cpu_count() + 1), *args)
 
     if os.path.isfile(QT_LICENSE_FILE):
         qt_license = '-commercial'
