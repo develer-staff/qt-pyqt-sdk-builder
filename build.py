@@ -41,12 +41,14 @@ import sdk
 # Paths
 #
 
+iswin = sys.platform.startswith("win")
+
 HERE = os.path.abspath(os.path.dirname(__file__))
 HOME = os.path.expanduser('~')
 PYQT_LICENSE_FILE = os.path.join(HERE, 'pyqt-commercial.sip')
 QT_LICENSE_FILE = os.path.join(HERE, 'qt-license.txt')
 SUPPORT_DIR = os.path.join(HERE, 'support')
-EXECUTABLE_EXT = ".exe" if sys.platform == 'win32' else ""
+EXECUTABLE_EXT = ".exe" if iswin else ""
 
 
 def check_bash():
