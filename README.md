@@ -36,7 +36,7 @@ We usually build and test against the latest version of Qt 4, Qt 5, SIP and PyQt
 | Windows  | -   | -     | Yes (2008)\*    | No    |
 
 \* Supported Versions are : Visual C++ and Visual C++ 2008 Express Editions. Visual Studio
-C++ for Python is currently incompatible.
+C++ for Python is currently incompatible (see [Cython Extensions On Windows](https://github.com/cython/cython/wiki/CythonExtensionsOnWindows) for a possible workaround).
 
 
 ## Installing Dependencies
