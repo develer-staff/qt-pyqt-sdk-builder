@@ -41,11 +41,14 @@ import sdk
 # Paths
 #
 
+iswin = sys.platform.startswith("win")
+
 HERE = os.path.abspath(os.path.dirname(__file__))
 HOME = os.path.expanduser('~')
 PYQT_LICENSE_FILE = os.path.join(HERE, 'pyqt-commercial.sip')
 QT_LICENSE_FILE = os.path.join(HERE, 'qt-license.txt')
 SUPPORT_DIR = os.path.join(HERE, 'support')
+EXECUTABLE_EXT = ".exe" if iswin else ""
 
 
 def check_bash():
@@ -207,7 +210,6 @@ def install_scripts(install_root):
 # Function prototype: def f(layout, debug, profile) :: dict -> bool -> dict
 #
 
-
 def build_icu(layout, debug, profile):
     # NOTE: We always build ICU in release mode since we don't usually need to debug it.
     os.chdir('source')
@@ -310,7 +312,7 @@ def build_qt(layout, debug, profile):
         qt_configure_args.append('-mp')
 
     # Build Qt 4 with clang on OS X
-    if sys.platform == 'darwin' and os.path.isfile('/usr/bin/clang') and not is_qt5():
+    if sys.platform == 'darwin' and os.path.isfile('/usr/bin/clang') and os.path.isfile('/usr/bin/clang++') and not is_qt5():
         qt_configure_args.extend(['-platform', 'unsupported/macx-clang'])
 
     # Build
@@ -343,8 +345,8 @@ def build_pyqt(layout, debug, profile):
     if os.path.isfile(PYQT_LICENSE_FILE):
         shutil.copyfile(PYQT_LICENSE_FILE, os.path.join('sip', 'pyqt-commercial.sip'))
 
-    # Configure
-    configure_args = [
+    # Configure-ng
+    configure_ng_args = [
         '--assume-shared',
         '--bindir', layout['bin'],
         '--concatenate',
@@ -354,14 +356,17 @@ def build_pyqt(layout, debug, profile):
         '--no-designer-plugin',
         '--no-docstrings',
         '--no-sip-files',
-        '--sip=%s' % os.path.join(layout['bin'], 'sip.exe' if sys.platform == 'win32' else 'sip'),
+        '--sip', os.path.join(layout['bin'], 'sip'+EXECUTABLE_EXT),
+        '--sipdir', layout['sip'],
         '--verbose',
     ]
+    if 'pyqt' in profile and 'common' in profile['pyqt']:
+        configure_ng_args += profile['pyqt']['common']
 
-    set_pyqt_debug_flags(debug, configure_args)
+    set_pyqt_debug_flags(debug, configure_ng_args)
 
     # Build
-    configure(*configure_args)
+    configure_ng(*configure_ng_args)
     make()
     make('install')
 
@@ -376,6 +381,10 @@ def is_qt5():
 
 def configure(*args):
     sdk.sh(sys.executable, 'configure.py', *args)
+
+
+def configure_ng(*args):
+    sdk.sh(sys.executable, 'configure-ng.py', *args)
 
 
 def configure_qt(*args):
