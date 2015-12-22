@@ -41,14 +41,12 @@ import sdk
 # Paths
 #
 
-iswin = sys.platform.startswith("win")
-
 HERE = os.path.abspath(os.path.dirname(__file__))
 HOME = os.path.expanduser('~')
 PYQT_LICENSE_FILE = os.path.join(HERE, 'pyqt-commercial.sip')
 QT_LICENSE_FILE = os.path.join(HERE, 'qt-license.txt')
 SUPPORT_DIR = os.path.join(HERE, 'support')
-EXECUTABLE_EXT = ".exe" if iswin else ""
+EXECUTABLE_EXT = ".exe" if sys.platform == 'win32' else ""
 
 
 def check_bash():
@@ -312,7 +310,10 @@ def build_qt(layout, debug, profile):
         qt_configure_args.append('-mp')
 
     # Build Qt 4 with clang on OS X
-    if sys.platform == 'darwin' and os.path.isfile('/usr/bin/clang') and os.path.isfile('/usr/bin/clang++') and not is_qt5():
+    has_clang = sys.platform == 'darwin' \
+        and os.path.isfile('/usr/bin/clang') \
+        and os.path.isfile('/usr/bin/clang++')
+    if has_clang and not is_qt5():
         qt_configure_args.extend(['-platform', 'unsupported/macx-clang'])
 
     # Build
