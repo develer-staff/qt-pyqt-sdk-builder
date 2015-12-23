@@ -93,6 +93,7 @@ def setup(install_root, relocate=True):
 
 def svn_update_current_platform(install_root):
     with sdk.chdir(HERE):
+        sdk.sh('svn', 'revert', '-R', install_root)
         sdk.sh('svn', 'up', install_root)
 
 
