@@ -147,19 +147,25 @@ def setup_environment(layout):
     os.environ['QT_PLUGIN_PATH'] = os.path.join(layout['plugins'])
     os.environ['QT_PYQT_SDK_SETUP_DONE'] = '1'
 
+    def pathlist_prepend(key, value):
+        paths = [value]
+        if key in os.environ:
+            paths += os.environ[key].split(os.pathsep)
+        os.environ[key] = os.pathsep.join(paths).strip(os.pathsep)
+
     if sys.platform == 'linux2':
-        os.environ['LD_LIBRARY_PATH'] = layout['lib']
+        pathlist_prepend('LD_LIBRARY_PATH', layout['lib'])
     elif sys.platform == 'darwin':
-        os.environ['DYLD_FRAMEWORK_PATH'] = layout['lib']
-        os.environ['DYLD_LIBRARY_PATH'] = layout['lib']
+        pathlist_prepend('DYLD_FRAMEWORK_PATH', layout['lib'])
+        pathlist_prepend('DYLD_LIBRARY_PATH', layout['lib'])
     elif sys.platform == 'win32':
         # Setup Visual C++ 2008 environment variables.
         from distutils.msvccompiler import MSVCCompiler
         msvc = MSVCCompiler()
         msvc.initialize()
 
-        os.environ['INCLUDE'] = os.pathsep.join([layout['include'], os.environ['INCLUDE']])
-        os.environ['LIB'] = os.pathsep.join([layout['lib'], os.environ['LIB']])
+        pathlist_prepend('INCLUDE', layout['include'])
+        pathlist_prepend('LIB', layout['lib'])
         os.environ['QMAKESPEC'] = 'win32-msvc2008'
 
         os.environ['PATH'] = os.pathsep.join([
