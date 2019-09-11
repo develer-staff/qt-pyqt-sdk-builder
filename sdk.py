@@ -177,6 +177,38 @@ def print_box(*args):
     print('')
 
 
+def yes_no(prompt='Yes or No', default="y"):
+    """Prompt user, printing a question, and do not exit
+    until he/she has answered yes or no (or y/n) or
+    provoked a KeyboardInterrupt (return None in this case)
+    return True/False
+    """
+    while True:
+        try:
+            true_vals = ['yes', 'y']
+            false_vals = ['no', 'n']
+            if default == "y":
+                def_str = "Y/n"
+                true_vals.append('')
+            else:
+                default = "n"
+                def_str = "y/N"
+                false_vals.append('')
+            i = raw_input("{0}  [{1}]".format(prompt, def_str))
+        except KeyboardInterrupt:
+            return None
+        if i.lower() in true_vals:
+            return True
+        return False
+
+
+def pause():
+    """wait until a keypress
+    """
+    print ("\t-press any key to continue-")
+    raw_input()
+
+
 copy_tree = distutils.dir_util.copy_tree
 
 
@@ -191,6 +223,10 @@ def expand(source, dest=None):
         zipfile.ZipFile(source).extractall(dest)
     else:
         tarfile.open(source).extractall(dest)
+
+
+def create_file(filename):
+    open(filename, 'a').close()
 
 
 def die(*args):

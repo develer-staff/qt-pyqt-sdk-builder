@@ -3,7 +3,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2014  Develer S.r.L.
+# Copyright (c) 2014-2015  Develer S.r.L.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -41,12 +41,14 @@ import sdk
 # Paths
 #
 
+iswin = sys.platform.startswith("win")
+
 HERE = os.path.abspath(os.path.dirname(__file__))
 HOME = os.path.expanduser('~')
 PYQT_LICENSE_FILE = os.path.join(HERE, 'pyqt-commercial.sip')
 QT_LICENSE_FILE = os.path.join(HERE, 'qt-license.txt')
 SUPPORT_DIR = os.path.join(HERE, 'support')
-EXECUTABLE_EXT = ".exe" if sys.platform == 'win32' else ""
+EXECUTABLE_EXT = ".exe" if iswin else ""
 
 
 def check_bash():
@@ -121,22 +123,23 @@ def parse_command_line():
             argparse.ArgumentTypeError("%r not found, provide an existing folder" % glob_pattern)
 
     args_parser.add_argument('-d', '--debug', action='store_true')
-    args_parser.add_argument(
-        '-k', '--shell', action='store_true', help="starts a shell just before starting the build")
-    args_parser.add_argument(
-        '-m', '--only-merge', action='store_true', help="Merge user provided files from ./merge")
+    args_parser.add_argument('-k', '--shell', action='store_true',
+                             help="starts a shell just before starting the build")
+    args_parser.add_argument('-m', '--only-merge', action='store_true',
+                             help="Merge user provided files from ./merge")
     args_parser.add_argument('-n', '--only-scripts', action='store_true',
                              help='Skip build step, update install scripts only')
-    args_parser.add_argument(
-        '-p', '--profile', type=sdk.maybe(sdk.ajson, {}), help="json config file for Qt build")
+    args_parser.add_argument('-p', '--profile', type=sdk.maybe(sdk.ajson, {}),
+                             help="json config file for Qt build")
     args_parser.add_argument('-r', '--install-root', help="default: %(default)s", type=sdk.mkdir,
                              default=os.path.join(HERE, '_out'))
     args_parser.add_argument('-c', '--with-icu-sources',  type=sdk.adir)
     args_parser.add_argument('-t', '--with-pyqt-sources', type=sdk.adir)
     args_parser.add_argument('-q', '--with-qt-sources',   type=sdk.adir)
     args_parser.add_argument('-s', '--with-sip-sources',  type=sdk.adir)
-    args_parser.add_argument('packages', metavar='PACKAGES', nargs='*', choices=['sip', 'qt', 'pyqt', 'icu', 'all'],
-                             default='all', help="Build only selected packages from {%(choices)s}, default: %(default)s")
+    args_parser.add_argument('packages', metavar='PACKAGES', nargs='*',
+                             choices=['all', 'icu', 'qt', 'sip', 'pyqt'], default='all',
+                             help="Build only selected packages from {%(choices)s}, default: %(default)s")
 
     args = args_parser.parse_args()
 
@@ -237,15 +240,44 @@ def build_icu(layout, debug, profile):
         sdk.die('You have to rebuild ICU only on OS X or Windows')
 
 
+def install_qt_requirements():
+    def is_ubuntu():
+        if os.path.exists("/etc/lsb-release"):
+            with open("/etc/lsb-release") as f:
+                for line in f:
+                    if line.startswith("DISTRIB_ID"):
+                        return "Ubuntu" in line
+        return False
+    if is_ubuntu():
+        sdk.sh("sudo", "apt-get", "install", "-y",
+               "libfontconfig1-dev",
+               "libfreetype6-dev",
+               "libx11-dev",
+               "libxcursor-dev",
+               "libxext-dev",
+               "libxfixes-dev",
+               "libxft-dev",
+               "libxi-dev",
+               "libxrandr-dev",
+               "libxrender-dev",
+               "libgl1-mesa-dev",
+               "libglu1-mesa-dev",
+               "libcups2-dev",
+               "python-dev")
+
+
 def build_qt(layout, debug, profile):
 
     def qtmake(*args):
-        try:
-            sdk.sh('jom', '/VERSION')
-        except:
+        if sys.platform == 'win32':
             make(*args)
         else:
-            sdk.sh('jom', '-j%s' % str(multiprocessing.cpu_count() + 1), *args)
+            try:
+                sdk.sh('jom', '/VERSION')
+            except:
+                make(*args)
+            else:
+                sdk.sh('jom', '-j%s' % str(multiprocessing.cpu_count() + 1), *args)
 
     if os.path.isfile(QT_LICENSE_FILE):
         qt_license = '-commercial'
@@ -315,6 +347,9 @@ def build_qt(layout, debug, profile):
         and os.path.isfile('/usr/bin/clang++')
     if has_clang and not is_qt5():
         qt_configure_args.extend(['-platform', 'unsupported/macx-clang'])
+
+    # Install build requirements (Ubuntu only)
+    install_qt_requirements()
 
     # Build
     configure_qt(*qt_configure_args)
